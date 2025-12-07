@@ -2,7 +2,6 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// 您提供的 Gold Land HK 專案設定
 const firebaseConfig = {
   apiKey: "AIzaSyDgxoJInutJY7ZvqCUi6ZG8sFOn3L0pGQg",
   authDomain: "gold-land-hk.firebaseapp.com",
@@ -13,11 +12,23 @@ const firebaseConfig = {
   measurementId: "G-7BYE0M8EZY"
 };
 
-// 初始化 Firebase
-// 檢查是否已經初始化過，避免在開發環境重複執行導致錯誤
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// 初始化 Firebase (加入防錯處理)
+let app;
+let db;
+let auth;
 
-const db = getFirestore(app);
-const auth = getAuth(app);
+try {
+  // 檢查是否已經初始化
+  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+  db = getFirestore(app);
+  // 加入 try-catch 防止瀏覽器隱私設定導致 Auth 初始化失敗
+  try {
+    auth = getAuth(app);
+  } catch (e) {
+    console.warn("Auth initialization blocked by browser settings (likely Incognito mode).", e);
+  }
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+}
 
 export { db, auth };
