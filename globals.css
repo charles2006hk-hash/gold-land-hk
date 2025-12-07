@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ... 下面是原本的 :root 和 body 設定 ... */
 :root {
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 0, 0, 0;
