@@ -1,4 +1,4 @@
-import './globals.css' // <--- 關鍵：引入全域樣式
+import './globals.css' // 確保這行在最上面
 import { Noto_Serif_TC, Inter } from 'next/font/google'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -16,6 +16,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="zh-HK">
+      <head>
+        {/* 加入一個簡單的 Favicon 連結，解決 404 */}
+        <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/741/741407.png" sizes="any" />
+      </head>
       <body className={`${inter.className} ${serif.variable}`}>{children}</body>
     </html>
   )
