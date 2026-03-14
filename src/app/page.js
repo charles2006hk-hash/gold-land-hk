@@ -1,11 +1,25 @@
 'use client'; // 標記為客戶端組件
 
 import React, { useState, useEffect } from 'react';
-import { Phone, Search, Menu, X, Filter, Facebook, Instagram, Shield, Globe, Award, ChevronRight, MessageCircle, LogIn, Plus, LayoutGrid, List, Upload, Image as ImageIcon, Save, Loader2, Trash2, Link as LinkIcon, DownloadCloud, CheckCircle } from 'lucide-react'; // ★ 新增了 DownloadCloud, CheckCircle
+import { Phone, Search, Menu, X, Filter, Facebook, Instagram, Shield, Globe, Award, ChevronRight, MessageCircle, LogIn, Plus, LayoutGrid, List, Upload, Image as ImageIcon, Save, Loader2, Trash2, Link as LinkIcon, DownloadCloud, CheckCircle } from 'lucide-react';
 
 // 引入 Firebase 功能
 import { db } from '../lib/firebase'; 
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+
+// --- 圖片網址加密器 (Image Proxy Helper) ---
+const getSecureImageUrl = (url) => {
+  if (!url) return '';
+  // 如果是 Firebase 圖片，轉為 Base64 亂碼並交由本地 API 代理
+  if (url.includes('firebasestorage.googleapis.com')) {
+    // 確保在瀏覽器環境下安全轉換
+    if (typeof window !== 'undefined') {
+      return `/api/image?q=${window.btoa(url)}`;
+    }
+  }
+  // 其他預設圖 (如 Unsplash) 照舊顯示
+  return url;
+};
 
 // --- 模擬數據 ---
 const INITIAL_MOCK_CARS = [
@@ -71,7 +85,6 @@ export default function Home() {
         }
 
         // 2. 讀取 DMS 內部系統嘅「實時營運狀態」 (API)
-        // ★ 已經換成您真實嘅 Vercel API 網址
         const res = await fetch('https://gold-land-auto.vercel.app/api/public/inventory');
         const liveDmsCars = res.ok ? await res.json() : [];
         
@@ -80,19 +93,13 @@ export default function Home() {
 
         // 3. ★★★ 狀態同步融合魔法 ★★★
         const mergedCars = localCars.map(localCar => {
-          // 如果呢架車係手動喺官網新增（無綁定 DMS ID），就保持原樣
           if (!localCar.dmsId) return localCar;
 
-          // 喺 DMS 實時數據中尋找呢架車
           const liveData = liveDmsCars.find(live => live.id === localCar.dmsId);
           
           if (liveData) {
-            // 情況 A：內部系統仍然係「在庫」或「已訂」，同步最新狀態
             return { ...localCar, status: liveData.status };
           } else {
-            // 情況 B：內部系統搵唔到 (因為 API 只會派發 在庫/已訂 嘅車)
-            // 代表架車喺內部已經被轉做「已售」、取消咗「官網發佈」或者被刪除。
-            // 系統會自動將前台狀態鎖死為「已售出」，等前台自動彈出 SOLD OUT 標籤！
             return { ...localCar, status: 'sold' }; 
           }
         });
@@ -120,7 +127,6 @@ export default function Home() {
     setNewCarForm({
       dmsId: dmsCar.id,
       title: dmsCar.title,
-      // 將 HK$ 格式清洗成純數字或保留原樣
       price: String(dmsCar.price).replace(/[^0-9]/g, ''), 
       year: dmsCar.year,
       type: dmsCar.type || 'hyper',
@@ -129,7 +135,7 @@ export default function Home() {
       status: 'in-stock',
       image: dmsCar.image || '',
       tags: dmsCar.tags ? dmsCar.tags.join(', ') : '',
-      remarks: '' // 留空讓行銷同事自由發揮
+      remarks: ''
     });
     setIsAddModalOpen(true);
   };
@@ -142,9 +148,9 @@ export default function Home() {
       const imageUrl = newCarForm.image || "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
 
       const carData = {
-        dmsId: newCarForm.dmsId, // ★ 紀錄來源 ID
+        dmsId: newCarForm.dmsId, 
         title: newCarForm.title,
-        price: `HK$ ${Number(newCarForm.price).toLocaleString()}`, // 自動格式化
+        price: `HK$ ${Number(newCarForm.price).toLocaleString()}`, 
         year: newCarForm.year,
         type: newCarForm.type,
         mileage: newCarForm.mileage,
@@ -152,7 +158,7 @@ export default function Home() {
         status: newCarForm.status,
         image: imageUrl,
         tags: newCarForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        remarks: newCarForm.remarks, // ★ 儲存行銷備註
+        remarks: newCarForm.remarks, 
         createdAt: new Date()
       };
 
@@ -166,7 +172,7 @@ export default function Home() {
       setIsAddModalOpen(false);
       setNewCarForm({ title: '', price: '', year: '', type: 'hyper', mileage: '', engine: '', status: 'in-stock', image: '', tags: '', remarks: '', dmsId: '' });
       alert("車輛上架成功！");
-      setAdminTab('inventory'); // 發佈完自動切回庫存頁
+      setAdminTab('inventory'); 
 
     } catch (error) {
       alert("上傳失敗");
@@ -194,7 +200,6 @@ export default function Home() {
         <div className="w-full md:w-64 bg-neutral-950 border-r border-neutral-800 p-6 flex flex-col">
           <h2 className="text-xl font-serif text-amber-500 mb-8 font-bold tracking-wider">GOLD LAND ADMIN</h2>
           <nav className="flex-1 space-y-4">
-            {/* ★★★ 修改 Sidebar：加入 DMS 待處理區切換 ★★★ */}
             <button onClick={() => setAdminTab('inventory')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${adminTab === 'inventory' ? 'bg-neutral-800 text-amber-500' : 'hover:bg-neutral-900 text-neutral-400'}`}>
               <LayoutGrid size={20} /> 已發佈官網庫存
             </button>
@@ -224,7 +229,6 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4">
-              {/* ★★★ 根據 Tab 顯示不同列表 ★★★ */}
               {adminTab === 'inventory' ? (
                 <>
                   <div className="hidden md:grid grid-cols-12 gap-4 p-4 bg-neutral-800 rounded-t-lg font-bold text-neutral-400 text-sm">
@@ -238,7 +242,10 @@ export default function Home() {
                   {cars.map(car => (
                     <div key={car.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-neutral-800/50 border-b border-neutral-700 items-center hover:bg-neutral-800 transition rounded-lg md:rounded-none">
                       <div className="col-span-1 text-neutral-500 text-xs md:text-base truncate">#{car.id.slice(0,5)}</div>
-                      <div className="col-span-1 md:col-span-2"><img src={car.image} className="w-16 h-12 md:w-20 md:h-14 object-cover rounded bg-neutral-700" /></div>
+                      <div className="col-span-1 md:col-span-2">
+                        {/* ★ 使用加密圖片 */}
+                        <img src={getSecureImageUrl(car.image)} className="w-16 h-12 md:w-20 md:h-14 object-cover rounded bg-neutral-700" />
+                      </div>
                       <div className="col-span-1 md:col-span-4 font-medium">
                         {car.title}
                         {car.dmsId && <span className="ml-2 text-[10px] bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded">DMS 來源</span>}
@@ -265,7 +272,8 @@ export default function Home() {
                     return (
                       <div key={car.id} className={`flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-neutral-800/50 border rounded-lg gap-4 ${isPublished ? 'border-green-900/50 opacity-60' : 'border-blue-500/30 hover:border-blue-500/80'}`}>
                         <div className="flex items-center gap-4">
-                          <img src={car.image} className="w-24 h-16 object-cover rounded bg-neutral-900" />
+                          {/* ★ 使用加密圖片 */}
+                          <img src={getSecureImageUrl(car.image)} className="w-24 h-16 object-cover rounded bg-neutral-900" />
                           <div>
                             <div className="font-bold text-lg">{car.title}</div>
                             <div className="text-xs text-neutral-400 mt-1 flex gap-2">
@@ -309,7 +317,8 @@ export default function Home() {
                         <input type="text" required placeholder="https://..." className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-10 p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.image} onChange={e => setNewCarForm({...newCarForm, image: e.target.value})} />
                       </div>
                       <div className="w-full h-48 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center justify-center overflow-hidden">
-                         {newCarForm.image ? <img src={newCarForm.image} className="w-full h-full object-cover" /> : <ImageIcon size={32} className="text-neutral-600" />}
+                         {/* ★ 使用加密圖片預覽 */}
+                         {newCarForm.image ? <img src={getSecureImageUrl(newCarForm.image)} className="w-full h-full object-cover" /> : <ImageIcon size={32} className="text-neutral-600" />}
                       </div>
                     </div>
 
@@ -335,7 +344,6 @@ export default function Home() {
                         </select>
                       </div>
 
-                      {/* ★★★ 新增：行銷備註欄位 ★★★ */}
                       <div className="space-y-2 md:col-span-2">
                          <label className="text-sm text-amber-500 font-bold flex items-center"><Award size={16} className="mr-1"/> 行銷備註 (顯示給客戶看)</label>
                          <textarea 
@@ -419,9 +427,9 @@ export default function Home() {
             {filteredCars.map(car => (
               <div key={car.id} className="group bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-amber-600/50 transition-all duration-300 flex flex-col">
                 <div className="relative h-64 overflow-hidden">
-                  <img src={car.image} alt={car.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"/>
+                  {/* ★ 使用加密圖片 */}
+                  <img src={getSecureImageUrl(car.image)} alt={car.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"/>
                   {car.status === 'sold' && <div className="absolute inset-0 bg-black/70 flex items-center justify-center"><span className="border-2 border-red-500 text-red-500 px-6 py-2 text-xl font-bold uppercase -rotate-12">SOLD OUT</span></div>}
-                  {/* ★ 在前台展示行銷標籤 */}
                   <div className="absolute top-4 left-4 flex gap-2">
                     {car.tags?.slice(0, 2).map((tag, i) => (
                       <span key={i} className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded border border-white/20">{tag}</span>
@@ -432,7 +440,6 @@ export default function Home() {
                   <h3 className="text-xl font-bold line-clamp-1">{car.title}</h3>
                   <p className="text-2xl text-amber-500 font-serif my-2">{car.price}</p>
                   
-                  {/* ★ 在前台展示同事寫的行銷備註 */}
                   {car.remarks && (
                     <div className="bg-neutral-800/50 p-3 rounded-lg mb-4 text-sm text-neutral-300 leading-relaxed flex-1">
                       {car.remarks}
