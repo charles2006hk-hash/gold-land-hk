@@ -7,17 +7,21 @@ import { Phone, Search, Menu, X, Filter, Facebook, Instagram, Shield, Globe, Awa
 import { db } from '../lib/firebase'; 
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
-// --- 圖片網址加密器 (Image Proxy Helper) ---
+// --- 圖片網址加密器 (升級版：完美支援 Next.js SSR) ---
 const getSecureImageUrl = (url) => {
   if (!url) return '';
-  // 如果是 Firebase 圖片，轉為 Base64 亂碼並交由本地 API 代理
+  
+  // 如果係 Firebase 圖片，就轉做 Base64 亂碼
   if (url.includes('firebasestorage.googleapis.com')) {
-    // 確保在瀏覽器環境下安全轉換
-    if (typeof window !== 'undefined') {
-      return `/api/image?q=${window.btoa(url)}`;
-    }
+    // 智能判斷：如果喺瀏覽器就用 btoa，如果喺伺服器就用 Buffer
+    const base64Url = typeof window !== 'undefined' 
+      ? window.btoa(url) 
+      : Buffer.from(url).toString('base64');
+      
+    return `/api/image?q=${base64Url}`;
   }
-  // 其他預設圖 (如 Unsplash) 照舊顯示
+  
+  // 其他預設圖 (例如 Unsplash) 照舊顯示
   return url;
 };
 
