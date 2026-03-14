@@ -56,44 +56,59 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- Effect: 從 Firestore 抓取官網已發佈數據 ---
+  // --- Effect: 終極融合 (讀取官網行銷數據 + 同步 DMS 實時狀態) ---
   useEffect(() => {
-    const fetchCars = async () => {
+    const loadAllData = async () => {
+      setLoading(true);
       try {
-        if (!db) return; 
-        setLoading(true);
-        const querySnapshot = await getDocs(collection(db, "cars"));
-        const firebaseCars = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        if (firebaseCars.length > 0) setCars(firebaseCars);
+        // 1. 讀取官網專屬嘅「行銷包裝資料」(Firestore)
+        let localCars = [];
+        if (db) {
+          const snap = await getDocs(collection(db, "cars"));
+          localCars = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } else {
+          localCars = INITIAL_MOCK_CARS;
+        }
+
+        // 2. 讀取 DMS 內部系統嘅「實時營運狀態」 (API)
+        // ★ 已經換成您真實嘅 Vercel API 網址
+        const res = await fetch('https://gold-land-auto.vercel.app/api/public/inventory');
+        const liveDmsCars = res.ok ? await res.json() : [];
+        
+        // 將 DMS 數據存入 Inbox，供後台使用
+        setDmsCars(liveDmsCars); 
+
+        // 3. ★★★ 狀態同步融合魔法 ★★★
+        const mergedCars = localCars.map(localCar => {
+          // 如果呢架車係手動喺官網新增（無綁定 DMS ID），就保持原樣
+          if (!localCar.dmsId) return localCar;
+
+          // 喺 DMS 實時數據中尋找呢架車
+          const liveData = liveDmsCars.find(live => live.id === localCar.dmsId);
+          
+          if (liveData) {
+            // 情況 A：內部系統仍然係「在庫」或「已訂」，同步最新狀態
+            return { ...localCar, status: liveData.status };
+          } else {
+            // 情況 B：內部系統搵唔到 (因為 API 只會派發 在庫/已訂 嘅車)
+            // 代表架車喺內部已經被轉做「已售」、取消咗「官網發佈」或者被刪除。
+            // 系統會自動將前台狀態鎖死為「已售出」，等前台自動彈出 SOLD OUT 標籤！
+            return { ...localCar, status: 'sold' }; 
+          }
+        });
+
+        // 4. 更新畫面
+        setCars(mergedCars);
+
       } catch (error) {
-        console.log("Firebase 讀取失敗:", error);
+        console.error("資料載入與融合失敗:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCars();
-  }, []);
 
-  // ★★★ 新增 Effect: 從金田內部系統讀取「待發佈車輛」 ★★★
-  useEffect(() => {
-    const fetchDMS = async () => {
-      if (isAdminMode) {
-        try {
-          const res = await fetch('https://gold-land-auto.vercel.app/api/public/inventory');
-          if (res.ok) {
-            const data = await res.json();
-            setDmsCars(data);
-          }
-        } catch (e) {
-          console.log("讀取 DMS 內部系統失敗，請確認 API 是否已啟動", e);
-        }
-      }
-    };
-    fetchDMS();
-  }, [isAdminMode]);
+    loadAllData();
+  }, []);
 
   const getWhatsAppLink = (carTitle, id) => {
     const message = `你好 Gold Land HK，我對官網上的 ${carTitle} (ID:${id}) 有興趣，想了解更多詳情。`;
