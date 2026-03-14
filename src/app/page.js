@@ -7,21 +7,16 @@ import { Phone, Search, Menu, X, Filter, Facebook, Instagram, Shield, Globe, Awa
 import { db } from '../lib/firebase'; 
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
-// --- 圖片網址加密器 (升級版：完美支援 Next.js SSR) ---
 const getSecureImageUrl = (url) => {
   if (!url) return '';
-  
-  // 如果係 Firebase 圖片，就轉做 Base64 亂碼
   if (url.includes('firebasestorage.googleapis.com')) {
-    // 智能判斷：如果喺瀏覽器就用 btoa，如果喺伺服器就用 Buffer
-    const base64Url = typeof window !== 'undefined' 
-      ? window.btoa(url) 
-      : Buffer.from(url).toString('base64');
-      
-    return `/api/image?q=${base64Url}`;
+    try {
+      // 統一使用 btoa (Next.js 最新環境支援)
+      return `/api/image?q=${btoa(url)}`;
+    } catch(e) {
+      return url;
+    }
   }
-  
-  // 其他預設圖 (例如 Unsplash) 照舊顯示
   return url;
 };
 
@@ -430,11 +425,29 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCars.map(car => (
               <div key={car.id} className="group bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-amber-600/50 transition-all duration-300 flex flex-col">
-                <div className="relative h-64 overflow-hidden">
-                  {/* ★ 使用加密圖片 */}
-                  <img src={getSecureImageUrl(car.image)} alt={car.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"/>
-                  {car.status === 'sold' && <div className="absolute inset-0 bg-black/70 flex items-center justify-center"><span className="border-2 border-red-500 text-red-500 px-6 py-2 text-xl font-bold uppercase -rotate-12">SOLD OUT</span></div>}
-                  <div className="absolute top-4 left-4 flex gap-2">
+                <div 
+                  className="relative h-64 overflow-hidden" 
+                  onContextMenu={(e) => e.preventDefault()} /* 1. 徹底封殺呢個區塊嘅右鍵選單 */
+                >
+                  {/* ★ 真實圖片 (加入 pointer-events-none 讓滑鼠無法觸碰) */}
+                  <img 
+                    src={getSecureImageUrl(car.image)} 
+                    alt={car.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 pointer-events-none select-none"
+                    draggable="false"
+                  />
+                  
+                  {/* ★ 隱形防護罩 (蓋喺圖片上面，攔截所有點擊) */}
+                  <div className="absolute inset-0 z-10 w-full h-full cursor-default"></div>
+
+                  {car.status === 'sold' && (
+                    <div className="absolute inset-0 z-20 bg-black/70 flex items-center justify-center pointer-events-none">
+                      <span className="border-2 border-red-500 text-red-500 px-6 py-2 text-xl font-bold uppercase -rotate-12">SOLD OUT</span>
+                    </div>
+                  )}
+                  
+                  {/* 行銷標籤 */}
+                  <div className="absolute top-4 left-4 flex gap-2 z-20 pointer-events-none">
                     {car.tags?.slice(0, 2).map((tag, i) => (
                       <span key={i} className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded border border-white/20">{tag}</span>
                     ))}
