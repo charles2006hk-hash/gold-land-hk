@@ -1,13 +1,11 @@
 'use client'; // 標記為客戶端組件
 
 import React, { useState, useEffect } from 'react';
-import { Phone, Search, Menu, X, Filter, Facebook, Instagram, Shield, Globe, Award, ChevronRight, MessageCircle, LogIn, Plus, LayoutGrid, List, Upload, Image as ImageIcon, Save, Loader2, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Phone, Search, Menu, X, Filter, Facebook, Instagram, Shield, Globe, Award, ChevronRight, MessageCircle, LogIn, Plus, LayoutGrid, List, Upload, Image as ImageIcon, Save, Loader2, Trash2, Link as LinkIcon, DownloadCloud, CheckCircle } from 'lucide-react'; // ★ 新增了 DownloadCloud, CheckCircle
 
 // 引入 Firebase 功能
-import { db } from '../lib/firebase'; // 移除 storage 引用
+import { db } from '../lib/firebase'; 
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
-// 移除 storage 相關的 import，暫時用不到
-// import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 // --- 模擬數據 ---
 const INITIAL_MOCK_CARS = [
@@ -21,20 +19,9 @@ const INITIAL_MOCK_CARS = [
     engine: "3.9L V8 Twin-Turbo",
     status: "in-stock", 
     image: "https://images.unsplash.com/photo-1592198084033-aade902d1aae?auto=format&fit=crop&q=80&w=1000",
-    tags: ["行貨", "陶瓷煞車", "碳纖維內飾"]
-  },
-  {
-    id: 'mock-2',
-    title: "Toyota Alphard Executive (Demo)",
-    price: "HK$ 988,000",
-    year: "2023",
-    type: "mpv",
-    mileage: "New",
-    engine: "2.5L Hybrid",
-    status: "incoming",
-    image: "https://images.unsplash.com/photo-1621503410500-2e008e3845c9?auto=format&fit=crop&q=80&w=1000",
-    tags: ["全新車", "JBL音響", "蒙娜麗莎椅"]
-  },
+    tags: ["行貨", "陶瓷煞車", "碳纖維內飾"],
+    remarks: "🔥 絕版極新淨，原廠保養紀錄齊全！"
+  }
 ];
 
 export default function Home() {
@@ -48,26 +35,28 @@ export default function Home() {
   const [cars, setCars] = useState(INITIAL_MOCK_CARS);
   const [loading, setLoading] = useState(false);
 
+  // ★★★ 新增：CMS 分離架構狀態 ★★★
+  const [dmsCars, setDmsCars] = useState([]); // 存放從內部系統 API 傳過來的車輛
+  const [adminTab, setAdminTab] = useState('inventory'); // 切換「已發佈」或「DMS 待處理」
+
   // Admin Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   
-  // Form State: 注意這裡移除了 imageFile，只保留 image (網址字串)
+  // Form State: ★ 新增 remarks (行銷備註) 與 dmsId (來源綁定)
   const [newCarForm, setNewCarForm] = useState({
     title: '', price: '', year: '', type: 'hyper', mileage: '', engine: '', status: 'in-stock', 
-    image: '', tags: ''
+    image: '', tags: '', remarks: '', dmsId: ''
   });
 
   // --- Effect: 監聽滾動 ---
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- Effect: 從 Firestore 抓取真實數據 ---
+  // --- Effect: 從 Firestore 抓取官網已發佈數據 ---
   useEffect(() => {
     const fetchCars = async () => {
       try {
@@ -78,83 +67,107 @@ export default function Home() {
           id: doc.id,
           ...doc.data()
         }));
-        
-        if (firebaseCars.length > 0) {
-          setCars(firebaseCars);
-        }
+        if (firebaseCars.length > 0) setCars(firebaseCars);
       } catch (error) {
-        console.log("Firebase 尚未連接或讀取失敗，使用演示數據:", error);
+        console.log("Firebase 讀取失敗:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchCars();
   }, []);
 
-  // WhatsApp 連結
+  // ★★★ 新增 Effect: 從金田內部系統讀取「待發佈車輛」 ★★★
+  useEffect(() => {
+    const fetchDMS = async () => {
+      if (isAdminMode) {
+        try {
+          // ⚠️ 注意：請將這裡替換為您內部系統部署後的真實 API 網址 (例如 https://your-internal-dms.vercel.app/api/public/inventory)
+          // 本地測試時可以先用內部系統的 localhost 網址
+          const res = await fetch('http://localhost:3000/api/public/inventory'); 
+          if (res.ok) {
+            const data = await res.json();
+            setDmsCars(data);
+          }
+        } catch (e) {
+          console.log("讀取 DMS 內部系統失敗，請確認 API 是否已啟動", e);
+        }
+      }
+    };
+    fetchDMS();
+  }, [isAdminMode]);
+
   const getWhatsAppLink = (carTitle, id) => {
     const message = `你好 Gold Land HK，我對官網上的 ${carTitle} (ID:${id}) 有興趣，想了解更多詳情。`;
     return `https://wa.me/85212345678?text=${encodeURIComponent(message)}`;
   };
 
-  // --- Admin Functions (No Storage Version) ---
+  // ★★★ 新增：一鍵導入 DMS 資料至編輯器 ★★★
+  const handleImportFromDMS = (dmsCar) => {
+    setNewCarForm({
+      dmsId: dmsCar.id,
+      title: dmsCar.title,
+      // 將 HK$ 格式清洗成純數字或保留原樣
+      price: String(dmsCar.price).replace(/[^0-9]/g, ''), 
+      year: dmsCar.year,
+      type: dmsCar.type || 'hyper',
+      mileage: dmsCar.mileage,
+      engine: dmsCar.engine,
+      status: 'in-stock',
+      image: dmsCar.image || '',
+      tags: dmsCar.tags ? dmsCar.tags.join(', ') : '',
+      remarks: '' // 留空讓行銷同事自由發揮
+    });
+    setIsAddModalOpen(true);
+  };
 
   const handleAddCar = async (e) => {
     e.preventDefault();
     setIsUploading(true);
 
     try {
-      // 這裡不再進行檔案上傳，直接使用用戶輸入的 URL
-      const imageUrl = newCarForm.image || "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000"; // 預設圖片
+      const imageUrl = newCarForm.image || "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1000";
 
       const carData = {
+        dmsId: newCarForm.dmsId, // ★ 紀錄來源 ID
         title: newCarForm.title,
-        price: newCarForm.price,
+        price: `HK$ ${Number(newCarForm.price).toLocaleString()}`, // 自動格式化
         year: newCarForm.year,
         type: newCarForm.type,
         mileage: newCarForm.mileage,
         engine: newCarForm.engine,
         status: newCarForm.status,
-        image: imageUrl, // 直接存網址
-        tags: newCarForm.tags.split(',').map(tag => tag.trim()),
+        image: imageUrl,
+        tags: newCarForm.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        remarks: newCarForm.remarks, // ★ 儲存行銷備註
         createdAt: new Date()
       };
 
-      // 寫入 Firestore Database
       if (db) {
         const docRef = await addDoc(collection(db, "cars"), carData);
         setCars([{ id: docRef.id, ...carData }, ...cars]); 
       } else {
-        // Fallback
         setCars([{ id: Date.now(), ...carData }, ...cars]);
-        alert("Firebase DB 未連接，僅更新畫面演示");
       }
 
       setIsAddModalOpen(false);
-      setNewCarForm({
-        title: '', price: '', year: '', type: 'hyper', mileage: '', engine: '', status: 'in-stock', image: '', tags: ''
-      });
+      setNewCarForm({ title: '', price: '', year: '', type: 'hyper', mileage: '', engine: '', status: 'in-stock', image: '', tags: '', remarks: '', dmsId: '' });
       alert("車輛上架成功！");
+      setAdminTab('inventory'); // 發佈完自動切回庫存頁
 
     } catch (error) {
-      console.error("上傳失敗:", error);
-      alert("上傳失敗，請檢查 Firestore 權限或網絡");
+      alert("上傳失敗");
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleDeleteCar = async (id) => {
-    if(confirm("確定要刪除這台車嗎？")) {
+    if(confirm("確定要刪除這台車嗎？(這不會影響內部系統的數據)")) {
       try {
-        if (db) {
-           await deleteDoc(doc(db, "cars", id));
-        }
+        if (db) await deleteDoc(doc(db, "cars", id));
         setCars(cars.filter(c => c.id !== id));
-      } catch (error) {
-        console.error("刪除失敗", error);
-      }
+      } catch (error) { console.error("刪除失敗", error); }
     }
   };
 
@@ -168,14 +181,17 @@ export default function Home() {
         <div className="w-full md:w-64 bg-neutral-950 border-r border-neutral-800 p-6 flex flex-col">
           <h2 className="text-xl font-serif text-amber-500 mb-8 font-bold tracking-wider">GOLD LAND ADMIN</h2>
           <nav className="flex-1 space-y-4">
-            <button className="flex items-center gap-3 w-full p-3 bg-neutral-800 rounded-lg text-amber-500">
-              <LayoutGrid size={20} /> 車輛庫存管理
+            {/* ★★★ 修改 Sidebar：加入 DMS 待處理區切換 ★★★ */}
+            <button onClick={() => setAdminTab('inventory')} className={`flex items-center gap-3 w-full p-3 rounded-lg transition ${adminTab === 'inventory' ? 'bg-neutral-800 text-amber-500' : 'hover:bg-neutral-900 text-neutral-400'}`}>
+              <LayoutGrid size={20} /> 已發佈官網庫存
             </button>
-            <button className="flex items-center gap-3 w-full p-3 hover:bg-neutral-900 rounded-lg text-neutral-400 transition">
+            <button onClick={() => setAdminTab('dms')} className={`flex items-center justify-between w-full p-3 rounded-lg transition ${adminTab === 'dms' ? 'bg-neutral-800 text-amber-500' : 'hover:bg-neutral-900 text-neutral-400'}`}>
+              <div className="flex items-center gap-3"><DownloadCloud size={20} /> DMS 待處理區</div>
+              {dmsCars.length > 0 && <span className="bg-amber-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">{dmsCars.length}</span>}
+            </button>
+            
+            <button className="flex items-center gap-3 w-full p-3 hover:bg-neutral-900 rounded-lg text-neutral-400 transition mt-4">
               <MessageCircle size={20} /> 客戶詢盤
-            </button>
-            <button className="flex items-center gap-3 w-full p-3 hover:bg-neutral-900 rounded-lg text-neutral-400 transition">
-              <Facebook size={20} /> Facebook 同步
             </button>
           </nav>
           <button onClick={() => setIsAdminMode(false)} className="mt-8 md:mt-auto flex items-center gap-2 text-sm text-neutral-500 hover:text-white p-2">
@@ -186,80 +202,101 @@ export default function Home() {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 relative">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold">車輛庫存 (Inventory)</h1>
-            <button onClick={() => setIsAddModalOpen(true)} className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded flex items-center gap-2 shadow-lg shadow-amber-900/20">
-              <Plus size={18} /> 新增車輛
-            </button>
+            <h1 className="text-2xl font-bold">{adminTab === 'inventory' ? '官網現有庫存 (Published)' : '內部系統傳送 (DMS Inbox)'}</h1>
+            {adminTab === 'inventory' && (
+              <button onClick={() => setIsAddModalOpen(true)} className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded flex items-center gap-2 shadow-lg shadow-amber-900/20">
+                <Plus size={18} /> 手動新增
+              </button>
+            )}
           </div>
 
           <div className="grid gap-4">
-              <div className="hidden md:grid grid-cols-12 gap-4 p-4 bg-neutral-800 rounded-t-lg font-bold text-neutral-400 text-sm">
-                <div className="col-span-1">ID</div>
-                <div className="col-span-2">圖片</div>
-                <div className="col-span-4">標題</div>
-                <div className="col-span-2">價格</div>
-                <div className="col-span-2">狀態</div>
-                <div className="col-span-1">操作</div>
-              </div>
-              
-              {cars.map(car => (
-                <div key={car.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-neutral-800/50 border-b border-neutral-700 items-center hover:bg-neutral-800 transition rounded-lg md:rounded-none">
-                  <div className="col-span-1 text-neutral-500 text-xs md:text-base truncate">#{car.id}</div>
-                  <div className="col-span-1 md:col-span-2">
-                    <img src={car.image} alt={car.title} className="w-16 h-12 md:w-20 md:h-14 object-cover rounded bg-neutral-700" />
+              {/* ★★★ 根據 Tab 顯示不同列表 ★★★ */}
+              {adminTab === 'inventory' ? (
+                <>
+                  <div className="hidden md:grid grid-cols-12 gap-4 p-4 bg-neutral-800 rounded-t-lg font-bold text-neutral-400 text-sm">
+                    <div className="col-span-1">ID</div>
+                    <div className="col-span-2">圖片</div>
+                    <div className="col-span-4">標題</div>
+                    <div className="col-span-2">價格</div>
+                    <div className="col-span-2">狀態</div>
+                    <div className="col-span-1">操作</div>
                   </div>
-                  <div className="col-span-1 md:col-span-4 font-medium">{car.title}</div>
-                  <div className="col-span-1 md:col-span-2 text-amber-500">{car.price}</div>
-                  <div className="col-span-1 md:col-span-2">
-                    <span className={`px-2 py-1 rounded text-xs ${car.status === 'sold' ? 'bg-red-900/50 text-red-200' : car.status === 'incoming' ? 'bg-blue-900/50 text-blue-200' : 'bg-green-900/50 text-green-200'}`}>
-                      {car.status === 'sold' ? '已售出' : car.status === 'incoming' ? '期貨' : '現貨'}
-                    </span>
+                  {cars.map(car => (
+                    <div key={car.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-neutral-800/50 border-b border-neutral-700 items-center hover:bg-neutral-800 transition rounded-lg md:rounded-none">
+                      <div className="col-span-1 text-neutral-500 text-xs md:text-base truncate">#{car.id.slice(0,5)}</div>
+                      <div className="col-span-1 md:col-span-2"><img src={car.image} className="w-16 h-12 md:w-20 md:h-14 object-cover rounded bg-neutral-700" /></div>
+                      <div className="col-span-1 md:col-span-4 font-medium">
+                        {car.title}
+                        {car.dmsId && <span className="ml-2 text-[10px] bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded">DMS 來源</span>}
+                      </div>
+                      <div className="col-span-1 md:col-span-2 text-amber-500">{car.price}</div>
+                      <div className="col-span-1 md:col-span-2">
+                        <span className={`px-2 py-1 rounded text-xs ${car.status === 'sold' ? 'bg-red-900/50 text-red-200' : car.status === 'incoming' ? 'bg-blue-900/50 text-blue-200' : 'bg-green-900/50 text-green-200'}`}>
+                          {car.status === 'sold' ? '已售出' : car.status === 'incoming' ? '期貨' : '現貨'}
+                        </span>
+                      </div>
+                      <div className="col-span-1 flex gap-3 text-neutral-400">
+                        <button className="hover:text-red-500" onClick={() => handleDeleteCar(car.id)}><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-200 text-sm mb-4">
+                    💡 這裡顯示內部金田系統中已打勾「官網展示」的車輛。點擊「導入並包裝」加入宣傳字句後即可發佈。
                   </div>
-                  <div className="col-span-1 flex gap-3 text-neutral-400">
-                    <button className="hover:text-red-500" title="刪除" onClick={() => handleDeleteCar(car.id)}><Trash2 size={16} /></button>
-                  </div>
-                </div>
-              ))}
+                  {dmsCars.map(car => {
+                    const isPublished = cars.some(c => c.dmsId === car.id);
+                    return (
+                      <div key={car.id} className={`flex flex-col md:flex-row justify-between items-start md:items-center p-4 bg-neutral-800/50 border rounded-lg gap-4 ${isPublished ? 'border-green-900/50 opacity-60' : 'border-blue-500/30 hover:border-blue-500/80'}`}>
+                        <div className="flex items-center gap-4">
+                          <img src={car.image} className="w-24 h-16 object-cover rounded bg-neutral-900" />
+                          <div>
+                            <div className="font-bold text-lg">{car.title}</div>
+                            <div className="text-xs text-neutral-400 mt-1 flex gap-2">
+                               <span>ID: {car.id.slice(0,6)}</span>
+                               <span>{car.price}</span>
+                               <span>{car.year}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => handleImportFromDMS(car)} 
+                          disabled={isPublished}
+                          className={`px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 w-full md:w-auto justify-center transition-all ${isPublished ? 'bg-neutral-700 text-neutral-500' : 'bg-blue-600 text-white hover:bg-blue-500 shadow-lg'}`}
+                        >
+                          {isPublished ? <CheckCircle size={16}/> : <DownloadCloud size={16}/>}
+                          {isPublished ? '已發佈至前台' : '導入並包裝'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                  {dmsCars.length === 0 && <div className="text-center py-10 text-neutral-500">內部系統目前沒有推送任何新車輛</div>}
+                </>
+              )}
           </div>
 
-          {/* Add Car Modal */}
+          {/* Add/Edit Car Modal */}
           {isAddModalOpen && (
             <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
               <div className="bg-neutral-900 border border-neutral-700 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
                 <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
-                  <h3 className="text-xl font-bold flex items-center gap-2"><Plus className="text-amber-500" /> 上架新車</h3>
+                  <h3 className="text-xl font-bold flex items-center gap-2"><Plus className="text-amber-500" /> {newCarForm.dmsId ? '包裝並發佈車輛' : '上架新車'}</h3>
                   <button onClick={() => setIsAddModalOpen(false)} className="text-neutral-500 hover:text-white"><X size={24} /></button>
                 </div>
                 <div className="p-6 overflow-y-auto flex-1">
                   <form id="add-car-form" onSubmit={handleAddCar} className="space-y-6">
                     
-                    {/* Image URL Input Area (取代原本的 File Upload) */}
                     <div className="space-y-3">
-                      <label className="text-sm text-neutral-400">車輛圖片網址 (Image URL)</label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <LinkIcon className="absolute left-3 top-3 text-neutral-500" size={18} />
-                          <input 
-                            type="text" 
-                            required 
-                            placeholder="https://..." 
-                            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-10 p-3 text-white focus:border-amber-500 outline-none" 
-                            value={newCarForm.image} 
-                            onChange={e => setNewCarForm({...newCarForm, image: e.target.value})} 
-                          />
-                        </div>
+                      <label className="text-sm text-neutral-400">車輛圖片 (Image URL)</label>
+                      <div className="relative">
+                        <LinkIcon className="absolute left-3 top-3 text-neutral-500" size={18} />
+                        <input type="text" required placeholder="https://..." className="w-full bg-neutral-800 border border-neutral-700 rounded-lg pl-10 p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.image} onChange={e => setNewCarForm({...newCarForm, image: e.target.value})} />
                       </div>
-                      
-                      {/* Image Preview */}
-                      <div className="w-full h-48 bg-neutral-950 rounded-xl border-2 border-dashed border-neutral-800 flex items-center justify-center overflow-hidden relative">
-                         {newCarForm.image ? (
-                           <img src={newCarForm.image} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.target.src = 'https://via.placeholder.com/400x300?text=Invalid+Image'} />
-                         ) : (
-                           <div className="text-neutral-600 flex flex-col items-center">
-                             <ImageIcon size={32} className="mb-2" />
-                             <span className="text-sm">圖片預覽將顯示於此</span>
-                           </div>
-                         )}
+                      <div className="w-full h-48 bg-neutral-950 rounded-xl border border-neutral-800 flex items-center justify-center overflow-hidden">
+                         {newCarForm.image ? <img src={newCarForm.image} className="w-full h-full object-cover" /> : <ImageIcon size={32} className="text-neutral-600" />}
                       </div>
                     </div>
 
@@ -269,21 +306,12 @@ export default function Home() {
                         <input type="text" required className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.title} onChange={e => setNewCarForm({...newCarForm, title: e.target.value})} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm text-neutral-400">售價</label>
-                        <input type="text" required className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.price} onChange={e => setNewCarForm({...newCarForm, price: e.target.value})} />
+                        <label className="text-sm text-neutral-400">售價 (純數字)</label>
+                        <input type="number" required className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.price} onChange={e => setNewCarForm({...newCarForm, price: e.target.value})} />
                       </div>
                       <div className="space-y-2">
                          <label className="text-sm text-neutral-400">年份</label>
                          <input type="text" className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.year} onChange={e => setNewCarForm({...newCarForm, year: e.target.value})} />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm text-neutral-400">分類</label>
-                        <select className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.type} onChange={e => setNewCarForm({...newCarForm, type: e.target.value})}>
-                          <option value="hyper">超級跑車</option>
-                          <option value="luxury">豪華轎車</option>
-                          <option value="mpv">保姆車</option>
-                          <option value="jdm">JDM / 日本車</option>
-                        </select>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm text-neutral-400">狀態</label>
@@ -293,10 +321,19 @@ export default function Home() {
                           <option value="sold">已售出</option>
                         </select>
                       </div>
-                       <div className="space-y-2">
-                         <label className="text-sm text-neutral-400">引擎</label>
-                         <input type="text" className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.engine} onChange={e => setNewCarForm({...newCarForm, engine: e.target.value})} />
+
+                      {/* ★★★ 新增：行銷備註欄位 ★★★ */}
+                      <div className="space-y-2 md:col-span-2">
+                         <label className="text-sm text-amber-500 font-bold flex items-center"><Award size={16} className="mr-1"/> 行銷備註 (顯示給客戶看)</label>
+                         <textarea 
+                            rows={3} 
+                            placeholder="例如：極新淨、0字牌薄、原廠保養..." 
+                            className="w-full bg-amber-900/10 border border-amber-500/30 rounded-lg p-3 text-white focus:border-amber-500 outline-none resize-none" 
+                            value={newCarForm.remarks} 
+                            onChange={e => setNewCarForm({...newCarForm, remarks: e.target.value})} 
+                         />
                       </div>
+
                       <div className="space-y-2 md:col-span-2">
                          <label className="text-sm text-neutral-400">標籤 (用逗號分隔)</label>
                          <input type="text" className="w-full bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white focus:border-amber-500 outline-none" value={newCarForm.tags} onChange={e => setNewCarForm({...newCarForm, tags: e.target.value})} />
@@ -307,7 +344,7 @@ export default function Home() {
                 <div className="p-6 border-t border-neutral-800 flex justify-end gap-4 bg-neutral-900 rounded-b-2xl">
                   <button onClick={() => setIsAddModalOpen(false)} className="px-6 py-3 rounded-lg text-neutral-400 hover:text-white">取消</button>
                   <button type="submit" form="add-car-form" disabled={isUploading} className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold flex items-center gap-2">
-                    {isUploading ? <><Loader2 className="animate-spin" /> 處理中...</> : <><Save size={18} /> 儲存車輛</>}
+                    {isUploading ? <><Loader2 className="animate-spin" /> 處理中...</> : <><Globe size={18} /> 發佈至官網</>}
                   </button>
                 </div>
               </div>
@@ -337,12 +374,6 @@ export default function Home() {
           </div>
           <button className="md:hidden text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>{mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}</button>
         </div>
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-neutral-900 border-b border-neutral-800 p-6 flex flex-col gap-4 shadow-xl">
-            <a href="#" className="text-lg">首頁</a>
-            <button onClick={() => setIsAdminMode(true)} className="text-left text-neutral-500 flex items-center gap-2"><LogIn size={16} /> 員工後台</button>
-          </div>
-        )}
       </nav>
 
       {/* Hero Section */}
@@ -373,16 +404,30 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCars.map(car => (
-              <div key={car.id} className="group bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-amber-600/50 transition-all duration-300">
+              <div key={car.id} className="group bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-amber-600/50 transition-all duration-300 flex flex-col">
                 <div className="relative h-64 overflow-hidden">
                   <img src={car.image} alt={car.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"/>
                   {car.status === 'sold' && <div className="absolute inset-0 bg-black/70 flex items-center justify-center"><span className="border-2 border-red-500 text-red-500 px-6 py-2 text-xl font-bold uppercase -rotate-12">SOLD OUT</span></div>}
+                  {/* ★ 在前台展示行銷標籤 */}
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    {car.tags?.slice(0, 2).map((tag, i) => (
+                      <span key={i} className="bg-black/60 backdrop-blur-sm text-white text-[10px] px-2 py-1 rounded border border-white/20">{tag}</span>
+                    ))}
+                  </div>
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex-1 flex flex-col">
                   <h3 className="text-xl font-bold line-clamp-1">{car.title}</h3>
-                  <p className="text-2xl text-amber-500 font-serif mb-4">{car.price}</p>
-                  <div className="flex gap-3">
-                     <a href={getWhatsAppLink(car.title, car.id)} target="_blank" rel="noopener noreferrer" className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 rounded-lg transition flex items-center justify-center gap-2 text-sm font-bold"><MessageCircle size={18} /> WhatsApp</a>
+                  <p className="text-2xl text-amber-500 font-serif my-2">{car.price}</p>
+                  
+                  {/* ★ 在前台展示同事寫的行銷備註 */}
+                  {car.remarks && (
+                    <div className="bg-neutral-800/50 p-3 rounded-lg mb-4 text-sm text-neutral-300 leading-relaxed flex-1">
+                      {car.remarks}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 mt-auto">
+                     <a href={getWhatsAppLink(car.title, car.id)} target="_blank" rel="noopener noreferrer" className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 rounded-lg transition flex items-center justify-center gap-2 text-sm font-bold"><MessageCircle size={18} /> WhatsApp 查詢</a>
                   </div>
                 </div>
               </div>
