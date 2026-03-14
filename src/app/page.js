@@ -82,9 +82,7 @@ export default function Home() {
     const fetchDMS = async () => {
       if (isAdminMode) {
         try {
-          // ⚠️ 注意：請將這裡替換為您內部系統部署後的真實 API 網址 (例如 https://your-internal-dms.vercel.app/api/public/inventory)
-          // 本地測試時可以先用內部系統的 localhost 網址
-          const res = await fetch('http://localhost:3000/api/public/inventory'); 
+          const res = await fetch('https://gold-land-auto.vercel.app/api/public/inventory');
           if (res.ok) {
             const data = await res.json();
             setDmsCars(data);
