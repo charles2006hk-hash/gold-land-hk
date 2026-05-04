@@ -33,10 +33,10 @@ export default function Home() {
       {/* 🟢 第 0 層：純黑背景 */}
       <div className="absolute inset-0 bg-[#050200] z-0"></div>
 
-      {/* 🟢 第 1 層：【修復 HTML 錯誤】神車部位細節獨立圖層 */}
+      {/* 🟢 第 1 層：神車部位細節獨立圖層 */}
       <div className="absolute inset-0 z-1 pointer-events-none mix-blend-screen overflow-hidden">
         
-        {/* 神車 1：Pagani (左側) */}
+        {/* 神車 1：Pagani (左側偏中) */}
         <div 
           className="absolute top-[15%] left-[-5%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
           style={{ 
@@ -45,11 +45,7 @@ export default function Home() {
             animationDelay: '0s'
           }}
         >
-          <img 
-            src="/pagani.png" 
-            alt="Pagani"
-            className="w-full h-full object-cover" 
-          />
+          <img src="/pagani.png" alt="Pagani" className="w-full h-full object-cover" />
         </div>
 
         {/* 神車 2：Rolls Royce (右上) */}
@@ -61,27 +57,19 @@ export default function Home() {
             animationDelay: '4s'
           }}
         >
-          <img 
-            src="/rollsroyce.png" 
-            alt="Rolls Royce"
-            className="w-full h-full object-cover" 
-          />
+          <img src="/rollsroyce.png" alt="Rolls Royce" className="w-full h-full object-cover" />
         </div>
 
-        {/* 神車 3：Ferrari (右下) */}
+        {/* 神車 3：Ferrari (右下) - 🔧 已大幅往上拉並縮小尺寸，確保完美顯露 */}
         <div 
-          className="absolute bottom-[-5%] right-[10%] w-[50vw] h-[50vw] max-w-[700px] max-h-[700px] animate-breathe-parts"
+          className="absolute bottom-[10%] right-[2%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] animate-breathe-parts"
           style={{ 
             WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
             maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
             animationDelay: '8s'
           }}
         >
-          <img 
-            src="/ferrari.png" 
-            alt="Ferrari"
-            className="w-full h-full object-cover" 
-          />
+          <img src="/ferrari.png" alt="Ferrari" className="w-full h-full object-cover" />
         </div>
       </div>
       
@@ -89,7 +77,7 @@ export default function Home() {
       <div className="absolute top-[0%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-amber-600/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite' }}></div>
       <div className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-orange-900/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite alternate-reverse' }}></div>
 
-      {/* 🏎️ 第 3 層：SVG 靈魂光影線條 (已與圖片分離) */}
+      {/* 🏎️ 第 3 層：SVG 靈魂光影線條 */}
       <div className="absolute inset-0 z-3 pointer-events-none opacity-80">
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           <path d="M -50 850 Q 250 700, 450 650 T 1150 450 M 350 730 C 400 700, 500 700, 550 730" fill="transparent" stroke="rgba(251, 191, 36, 0.6)" strokeWidth="1" className="animate-streak" style={{ animationDelay: '0s' }} />
