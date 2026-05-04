@@ -1,5 +1,20 @@
 import Link from 'next/link';
 
+{/* 🛰️ 頂部導覽列 (加入首頁最上方) */}
+<nav className="fixed top-0 w-full z-50 flex justify-between items-baseline px-6 md:px-12 py-10 pointer-events-none">
+  <div className="text-zinc-400 font-serif tracking-[0.4em] text-sm pointer-events-auto cursor-default">
+    GOLDLAND <span className="text-amber-600/50 font-thin">|</span> HK
+  </div>
+  <div className="flex gap-12 pointer-events-auto">
+    <Link href="/collection" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em]">
+      COLLECTION
+    </Link>
+    <Link href="/vip" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em]">
+      MEMBERS
+    </Link>
+  </div>
+</nav>
+
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-black overflow-hidden font-sans selection:bg-amber-900/30 relative">
