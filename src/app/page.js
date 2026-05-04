@@ -4,6 +4,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-black overflow-hidden font-sans selection:bg-amber-900/30 relative">
       
+      {/* 注入自訂的 CSS 動畫 */}
       <style dangerouslySetInnerHTML={{__html: `
         /* 🏎️ 高速光影疾風動畫 */
         @keyframes streakLine {
@@ -17,10 +18,10 @@ export default function Home() {
           0%, 100% { opacity: 0.1; transform: scale(1); filter: blur(40px); }
           50% { opacity: 0.5; transform: scale(1.05); filter: blur(60px); }
         }
-        /* 🌌 【修復】車輛魂魄光影顯露動畫 (大幅提高能見度) */
+        /* 🌌 【升級】千萬超跑部件顯露動畫 (調高對比度，讓金屬與碳纖維更亮) */
         @keyframes breatheImages {
-          0%, 100% { opacity: 0.15; transform: scale(1.02); filter: grayscale(80%); }
-          50% { opacity: 0.45; transform: scale(1); filter: grayscale(30%) contrast(1.2); } /* 亮度推高到 45% */
+          0%, 100% { opacity: 0.1; transform: scale(1.02) translateZ(0); filter: grayscale(50%) brightness(0.8); }
+          50% { opacity: 0.45; transform: scale(1) translateZ(0); filter: grayscale(10%) brightness(1.2) contrast(1.3); } 
         }
         /* ⬇️ 向下滾動引導呼吸箭頭動畫 */
         @keyframes breatheGuide {
@@ -38,7 +39,7 @@ export default function Home() {
           animation: streakLine 1.5s ease-out infinite; 
         }
         .animate-breathe-images {
-          animation: breatheImages 15s ease-in-out infinite; /* 加快呼吸節奏，更容易察覺 */
+          animation: breatheImages 12s ease-in-out infinite; /* 呼吸節奏 */
         }
         .animate-breathe-guide {
           animation: breatheGuide 3s ease-in-out infinite; 
@@ -49,58 +50,53 @@ export default function Home() {
         }
       `}} />
 
-      {/* 🟢 第0層：日出而作，日落而奢的「純黑漸層背景」(修復：降到最底層 z-0) */}
+      {/* 🟢 第0層：日出而作，日落而奢的「純黑漸層背景」 */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0500] via-black to-[#05050a] bg-day-night z-0"></div>
 
-      {/* 🟢 第1層：【修復】車輛魂魄圖片 (移到背景之上 z-1，並加入 mix-blend-screen 呈現光影感) */}
-      <div className="absolute inset-0 z-1 animate-breathe-images pointer-events-none mix-blend-screen">
+      {/* 🟢 第1層：【修復與升級】千萬級別超跑部件 (加上了 Mask 讓邊緣完美羽化消失在黑暗中) */}
+      <div className="absolute inset-0 z-1 animate-breathe-images pointer-events-none mix-blend-lighten">
         
-        {/* Rolls Royce Spectre (右下角魂魄 - 帕德嫩神廟格柵與車頭) */}
-        <img 
-          src="https://images.unsplash.com/photo-1692120084323-8321857c5765?q=80&w=2500&auto=format&fit=crop" 
-          alt="Rolls Royce Spectre Phantom Luxe Icon"
-          className="absolute -bottom-10 -right-20 w-[60vw] h-[80vh] object-cover object-left-top opacity-80 mix-blend-lighten" 
-        />
+        {/* 1. Rolls Royce (右下角魂魄 - 歡慶女神立標與水箱護罩) */}
+        <div className="absolute -bottom-20 -right-20 w-[70vw] h-[90vh] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)] opacity-80">
+          <img 
+            src="https://images.unsplash.com/photo-1631828117621-0a6962fdd250?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Rolls Royce Emblem Detail"
+            className="w-full h-full object-cover object-left-top mix-blend-screen" 
+          />
+        </div>
         
-        {/* Pagani (左上角魂魄 - 銳利流線) */}
-        <img 
-          src="https://images.unsplash.com/photo-1678864757367-172554743b59?q=80&w=2500&auto=format&fit=crop" 
-          alt="Pagani Soul Line Icon"
-          className="absolute -top-10 -left-20 w-[60vw] h-[80vh] object-cover object-right-bottom opacity-70 mix-blend-lighten" 
-        />
-        
-        {/* 為了避免畫面太亂，中間留黑給文字，將 Bugatti 的圖案作為整體基調融合 */}
+        {/* 2. Hypercar 碳纖維與流線 (左上角魂魄 - 暗黑中的銳利車燈與側裙) */}
+        <div className="absolute -top-20 -left-20 w-[70vw] h-[90vh] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)] opacity-80">
+          <img 
+            src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Hypercar Carbon Detail"
+            className="w-full h-full object-cover object-right-bottom mix-blend-screen" 
+          />
+        </div>
+
+        {/* 3. 頂級超跑的引擎/散熱孔細節 (正上方隱約浮現) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[60vh] [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)] opacity-40">
+          <img 
+            src="https://images.unsplash.com/photo-1614200187524-dc4b892acf16?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Supercar Engine Detail"
+            className="w-full h-full object-cover object-center mix-blend-screen" 
+          />
+        </div>
       </div>
       
-      {/* 🌅 第2層：呼吸感的琥珀光暈 (z-2) */}
+      {/* 🌅 第2層：呼吸感的琥珀光暈 */}
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-amber-600/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite' }}></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-orange-900/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite' }}></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-orange-900/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite alternate-reverse' }}></div>
 
-      {/* 🏎️ 第3層：高速光影 SVG 線條 (z-3) */}
+      {/* 🏎️ 第3層：高速光影 SVG 線條 */}
       <div className="absolute inset-0 z-3 pointer-events-none opacity-90">
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           
-          <path 
-            d="M -50 850 Q 250 700, 450 650 T 1150 450 M 350 730 C 400 700, 500 700, 550 730 M 450 650 C 460 670, 460 690, 450 710" 
-            fill="transparent" 
-            stroke="url(#paganiGrad)" 
-            strokeWidth="1.2" 
-            className="animate-streak"
-            style={{ animationDelay: '0s' }}
-          />
-
+          <path d="M -50 850 Q 250 700, 450 650 T 1150 450 M 350 730 C 400 700, 500 700, 550 730 M 450 650 C 460 670, 460 690, 450 710" fill="transparent" stroke="url(#paganiGrad)" strokeWidth="1.2" className="animate-streak" style={{ animationDelay: '0s' }} />
           <path d="M 120 0 L 120 1000" fill="transparent" stroke="rgba(255, 255, 255, 0.03)" strokeWidth="0.8" className="animate-streak" style={{ animationDelay: '2.5s' }} />
           <path d="M 140 0 L 140 1000" fill="transparent" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="0.8" className="animate-streak" style={{ animationDelay: '2.5s' }} />
           <path d="M 0 350 L 1000 350" fill="transparent" stroke="rgba(251, 191, 36, 0.05)" strokeWidth="0.5" className="animate-streak" style={{ animationDelay: '1.2s' }} />
-
-          <path 
-          d="M 880 150 C 980 150, 1000 450, 880 700 C 730 700, 730 400, 880 400 M 820 500 C 830 520, 830 540, 820 560" 
-          fill="transparent" 
-          stroke="url(#bugattiGrad)" 
-          strokeWidth="1.5" 
-          className="animate-streak"
-          style={{ animationDelay: '0.8s' }}
-          />
+          <path d="M 880 150 C 980 150, 1000 450, 880 700 C 730 700, 730 400, 880 400 M 820 500 C 830 520, 830 540, 820 560" fill="transparent" stroke="url(#bugattiGrad)" strokeWidth="1.5" className="animate-streak" style={{ animationDelay: '0.8s' }} />
 
           <defs>
             <linearGradient id="paganiGrad" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -116,8 +112,8 @@ export default function Home() {
         </svg>
       </div>
 
-      {/* 🌌 第4層：主視覺內容區 (z-20) */}
-      <section className="relative z-20 w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 mt-12 pb-32">
+      {/* 🌌 第4層：主視覺內容區 */}
+      <section className="relative z-20 w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 pb-32">
         
         <div className="max-w-5xl w-full flex flex-col items-center mt-12 mb-16">
           
@@ -131,7 +127,7 @@ export default function Home() {
 
           <p className="text-lg md:text-xl text-zinc-400 font-light tracking-[0.4em] mb-16 opacity-95">
             日出而作 <span className="mx-4 text-amber-500/40 font-thin">|</span> 
-            <span className="text-amber-100/90 hover:text-amber-100 transition-colors duration-500 relative">
+            <span className="text-amber-100/90 hover:text-amber-100 transition-colors duration-500 relative cursor-default">
               日落而<span className="text-amber-200">奢</span> (Sunset Luxe)
               <div className="absolute inset-0 w-0 bg-amber-500/0 hover:w-full hover:bg-amber-900/10 transition-all duration-700"></div>
             </span>
@@ -176,7 +172,7 @@ export default function Home() {
           <div className="absolute top-0 -left-1/2 w-[120vw] h-[120vw] rounded-full bg-amber-900/10" style={{ animation: 'breatheGlow 25s infinite' }}></div>
           
           {[
-            { en: 'DIVERSITY', hk: '名車多樣性', desc: '為您網羅 Pagani、Bugatti、Rolls Royce 等傳奇魂魄線條與極致珍藏。' },
+            { en: 'DIVERSITY', hk: '名車多樣性', desc: '為您網羅 Pagani、Bugatti、Rolls Royce 等傳奇魂魄線條與千萬級別珍藏。' },
             { en: 'CROSS-BORDER', hk: '無縫跨境', desc: '專業代辦中港澳跨境指標指標手續，暢行大灣區，不受地域界限。' },
             { en: 'AI INTELLIGENCE', hk: '數位管家', desc: '數位程序管理，VIP 客戶專屬加密後台即時追蹤藝術品的旅程。' },
           ].map((service, index) => (
