@@ -16,6 +16,7 @@ export default function Home() {
           0%, 100% { opacity: 0.1; transform: scale(1); filter: blur(50px); }
           50% { opacity: 0.4; transform: scale(1.05); filter: blur(70px); }
         }
+        /* 讓神車部件有呼吸顯露感 */
         @keyframes breatheParts {
           0%, 100% { opacity: 0.2; transform: scale(1.02); filter: grayscale(30%) brightness(0.8); }
           50% { opacity: 0.8; transform: scale(1); filter: grayscale(0%) brightness(1.2); } 
@@ -35,50 +36,47 @@ export default function Home() {
       {/* 🟢 第 1 層：神車部位細節 (使用 closest-side 實現無痕羽化) */}
       <div className="absolute top-0 left-0 w-full h-screen z-1 pointer-events-none mix-blend-screen overflow-hidden">
         
-        {/* 神車 1：Pagani (左側偏上) - 修復生硬邊緣 */}
+        {/* 神車 1：Pagani (左側) - 🔧 縮小容器並更深地移入以獲得無痕融合 */}
         <div 
-          className="absolute top-[10%] left-[-5%] w-[50vw] h-[50vw] max-w-[650px] max-h-[650px] animate-breathe-parts"
+          className="absolute top-[20%] left-[2%] w-[35vw] h-[35vw] max-w-[550px] max-h-[550px] animate-breathe-parts"
           style={{ 
-            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
-            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%)',
+            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%)',
             animationDelay: '0s'
           }}
         >
-          {/* 確保您的 public 資料夾內有這個全小寫檔名的圖片 */}
           <img src="/pagani.png" alt="Pagani" className="w-full h-full object-cover" />
         </div>
 
-        {/* 神車 2：Rolls Royce (右上) */}
+        {/* 神車 2：Rolls Royce (右上) - 🔧 縮小容器並更深地移入 */}
         <div 
-          className="absolute top-[-5%] right-[-5%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
+          className="absolute top-[5%] right-[2%] w-[30vw] h-[30vw] max-w-[500px] max-h-[500px] animate-breathe-parts"
           style={{ 
-            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
-            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%)',
+            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%)',
             animationDelay: '4s'
           }}
         >
-          {/* 確保您的 public 資料夾內有這個全小寫檔名的圖片 */}
           <img src="/rollsroyce.png" alt="Rolls Royce" className="w-full h-full object-cover object-left" />
         </div>
 
-        {/* 神車 3：Ferrari (右下) - 🔧 絕對錨定在右下角，並使用最柔和的遮罩 */}
+        {/* 神車 3：Ferrari (右下) - 🔧 Detail 放大 (圖片變大) & 容器縮小 (移入) */}
         <div 
-          className="absolute bottom-0 right-0 w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
+          className="absolute bottom-[5%] right-[10%] w-[55vw] h-[55vw] max-w-[500px] max-h-[500px] animate-breathe-parts"
           style={{ 
-            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)',
-            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 65%)',
+            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 65%)',
             animationDelay: '8s'
           }}
         >
-          {/* ⚠️ 極度重要：請去 GitHub 確認法拉利的檔名是不是 100% 全小寫的 ferrari.png */}
-          <img src="/ferrari.png" alt="Ferrari" className="w-full h-full object-cover object-center" />
+          <img src="/ferrari.png" alt="Ferrari Detail Focus" className="w-full h-full object-cover object-center" />
         </div>
       </div>
       
-      {/* 🌅 第 2 層：環境琥珀光暈 */}
+      {/* 🌅 第 2 層：環境琥珀光暈 (配合日落而奢) */}
       <div className="absolute top-0 left-0 w-full h-screen z-2 pointer-events-none mix-blend-screen overflow-hidden">
-        <div className="absolute top-[0%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-amber-600/10" style={{ animation: 'breatheGlow 15s infinite' }}></div>
-        <div className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-orange-900/10" style={{ animation: 'breatheGlow 15s infinite alternate-reverse' }}></div>
+        <div className="absolute top-[0%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-amber-600/8" style={{ animation: 'breatheGlow 15s infinite' }}></div>
+        <div className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-orange-900/8" style={{ animation: 'breatheGlow 15s infinite alternate-reverse' }}></div>
       </div>
 
       {/* 🏎️ 第 3 層：SVG 靈魂光影線條 */}
@@ -147,7 +145,7 @@ export default function Home() {
           
           {[
             { en: 'GLOBAL ACQUISITION', hk: '全球車源配對', desc: '從 Pagani Utopia 至 Ferrari 812，為您精準尋獲稀世珍藏。' },
-            { en: 'CROSS-BORDER LOGISTICS', hk: '一站式跨境引進', desc: '訂購、運輸、出牌、倉存一條龍。專業中港澳跨境指標手續辦理。' },
+            { en: 'CROSS-BORDER LOGISTICS', hk: '一站式跨境引進', desc: '訂購、運輸、出牌、倉存一條龍。專業中港澳跨境指標指標手續辦理。' },
             { en: 'AI INTELLIGENCE', hk: '數位管家', desc: '數位化 AI 管家程序管理，VIP 客戶專屬後台即時追蹤愛車旅程。' },
           ].map((service, index) => (
             <div key={index} className="flex flex-col items-center text-center group cursor-default relative z-10">
@@ -172,7 +170,7 @@ export default function Home() {
       </section>
 
       {/* 🖋️ Footer */}
-      <footer className="w-full py-12 text-center text-zinc-700 text-xs font-light tracking-[0.4em] bg-black relative z-20 border-t border-zinc-900/50">
+      <footer className="w-full py-12 text-center text-zinc-700 text-xs font-light tracking-[0.4em] bg-black relative z-20 border-t border-zinc-900/50 Footer text-center">
         <p className="opacity-40 hover:opacity-100 transition-opacity duration-700">
           © {new Date().getFullYear()} GOLDLAND HK <span className="mx-2 font-extralight text-zinc-800">|</span> ELITE CONCIERGE
         </p>
