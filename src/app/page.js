@@ -7,84 +7,68 @@ export default function Home() {
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes streakLine {
           0% { stroke-dashoffset: 2500; opacity: 0; }
-          10% { stroke-dashoffset: 0; opacity: 0.8; } 
-          40% { stroke-dashoffset: 0; opacity: 0.15; } 
+          10% { stroke-dashoffset: 0; opacity: 0.6; } 
+          40% { stroke-dashoffset: 0; opacity: 0.1; } 
           100% { stroke-dashoffset: 2500; opacity: 0; } 
         }
         @keyframes breatheGlow {
           0%, 100% { opacity: 0.1; transform: scale(1); filter: blur(50px); }
-          50% { opacity: 0.4; transform: scale(1.05); filter: blur(70px); }
+          50% { opacity: 0.3; transform: scale(1.05); filter: blur(60px); }
         }
-        /* 讓神車部件有呼吸顯露感 */
+        /* 讓神車部件在黑影中隱約呼吸，不再泛白 */
         @keyframes breatheParts {
-          0%, 100% { opacity: 0.2; transform: scale(1.02); filter: grayscale(30%) brightness(0.7); }
-          50% { opacity: 0.7; transform: scale(1); filter: grayscale(0%) brightness(1.1); } 
+          0%, 100% { opacity: 0.08; filter: grayscale(80%) brightness(0.6); transform: scale(1.02); }
+          50% { opacity: 0.25; filter: grayscale(30%) brightness(1.1); transform: scale(1); } 
         }
         @keyframes breatheGuide {
           0%, 100% { opacity: 0.2; transform: translate(-50%, 0px); }
           50% { opacity: 0.8; transform: translate(-50%, 10px); }
         }
         .animate-streak { animation: streakLine 1.5s ease-out infinite; }
-        .animate-breathe-parts { animation: breatheParts 12s ease-in-out infinite; }
+        .animate-breathe-parts { animation: breatheParts 15s ease-in-out infinite; }
         .animate-breathe-guide { animation: breatheGuide 3s ease-in-out infinite; }
       `}} />
 
-      {/* 🟢 第 0 層：純黑背景 */}
-      <div className="absolute inset-0 bg-[#050200] z-0"></div>
+      {/* 🟢 第 0 層：純黑底色 */}
+      <div className="absolute inset-0 bg-black z-0"></div>
 
-      {/* 🟢 第 1 層：【終極修復】神車部位細節 (使用絕對生效的 WebkitMaskImage) */}
-      <div className="absolute inset-0 z-1 pointer-events-none mix-blend-lighten overflow-hidden">
+      {/* 🟢 第 1 層：神車部位細節 (改用方向性羽化，徹底消除探照燈的圓圈邊界) */}
+      <div className="absolute inset-0 z-1 pointer-events-none animate-breathe-parts mix-blend-lighten">
         
-        {/* 神車 1：Pagani Utopia / De Tomaso 碳纖維與機械感 (置於畫面左側偏中) */}
+        {/* 左側神車 (向右漸隱至透明) */}
         <div 
-          className="absolute top-[20%] left-[-5%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
-          style={{ 
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            animationDelay: '0s'
-          }}
+          className="absolute top-0 -left-10 w-[60vw] h-full"
+          style={{ WebkitMaskImage: 'linear-gradient(to right, black 10%, transparent 80%)', maskImage: 'linear-gradient(to right, black 10%, transparent 80%)' }}
         >
+          {/* 未來替換為：src="/pagani-utopia.jpg" */}
           <img 
-            src="https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=800&q=80" 
-            alt="Pagani Carbon Detail"
-            className="w-full h-full object-cover" 
+            src="https://images.unsplash.com/photo-1614200187524-dc4b892acf16?auto=format&fit=crop&w=1500&q=80" 
+            alt="Luxury Car Detail 1"
+            className="w-full h-full object-cover object-center" 
           />
         </div>
 
-        {/* 神車 2：Rolls Royce Boat Tail 歡慶女神與木紋感 (置於畫面上方偏右) */}
+        {/* 右側神車 (向左漸隱至透明) */}
         <div 
-          className="absolute top-[-5%] right-[-5%] w-[45vw] h-[45vw] max-w-[500px] max-h-[500px] animate-breathe-parts"
-          style={{ 
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            animationDelay: '3s'
-          }}
+          className="absolute top-0 -right-10 w-[60vw] h-full"
+          style={{ WebkitMaskImage: 'linear-gradient(to left, black 10%, transparent 80%)', maskImage: 'linear-gradient(to left, black 10%, transparent 80%)' }}
         >
+          {/* 未來替換為：src="/boat-tail.jpg" */}
           <img 
-            src="https://images.unsplash.com/photo-1631828117621-0a6962fdd250?auto=format&fit=crop&w=800&q=80" 
-            alt="Rolls Royce Emblem"
+            src="https://images.unsplash.com/photo-1631828117621-0a6962fdd250?auto=format&fit=crop&w=1500&q=80" 
+            alt="Luxury Car Detail 2"
             className="w-full h-full object-cover object-left" 
           />
         </div>
-
-        {/* 神車 3：Ferrari 812 Competizione 紅色侵略性尾部/側身 (置於畫面右下方) */}
-        <div 
-          className="absolute bottom-[5%] right-[10%] w-[55vw] h-[55vw] max-w-[650px] max-h-[650px] animate-breathe-parts"
-          style={{ 
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 65%)',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 65%)',
-            animationDelay: '6s'
-          }}
-        >
-          <img 
-            src="https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=800&q=80" 
-            alt="Ferrari 812 Detail"
-            className="w-full h-full object-cover" 
-          />
-        </div>
       </div>
+
+      {/* 🟢 第 1.5 層：【關鍵】邊緣暗影覆蓋層 (Vignette) 
+          這層厚厚的黑影會把圖片上下左右的邊緣全部吃掉，確保完全融入背景 
+      */}
+      <div className="absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(ellipse_at_center,transparent_30%,black_80%)]"></div>
+      <div className="absolute inset-0 z-1 pointer-events-none bg-gradient-to-b from-black via-transparent to-black opacity-80"></div>
       
-      {/* 🌅 第 2 層：環境琥珀光暈 */}
+      {/* 🌅 第 2 層：環境琥珀光暈 (降低透明度，更顯高級) */}
       <div className="absolute top-[0%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-amber-600/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite' }}></div>
       <div className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-orange-900/10 z-2 mix-blend-screen" style={{ animation: 'breatheGlow 15s infinite alternate-reverse' }}></div>
 
@@ -98,7 +82,7 @@ export default function Home() {
           <defs>
             <linearGradient id="paganiGrad" x1="0%" y1="100%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="rgba(255, 255, 255, 0)" />
-              <stop offset="50%" stopColor="rgba(251, 191, 36, 0.6)" />
+              <stop offset="50%" stopColor="rgba(251, 191, 36, 0.5)" />
               <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
             </linearGradient>
             <linearGradient id="bugattiGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -164,19 +148,21 @@ export default function Home() {
           
           {[
             { en: 'GLOBAL ACQUISITION', hk: '全球車源配對', desc: '從 Pagani Utopia 至 Ferrari 812，為您精準尋獲稀世珍藏。' },
-            { en: 'CROSS-BORDER LOGISTICS', hk: '一站式跨境引進', desc: '訂購、運輸、出牌、倉存一條龍。專業中港澳跨境指標手續。' },
-            { en: 'AI INTELLIGENCE', hk: '數位管家', desc: '數位化 AI 管家程序管理，VIP 客戶專屬後台即時追蹤愛車旅程。' },
+            { en: 'CROSS-BORDER LOGISTICS', hk: '一站式跨境引進', desc: '訂購、運輸、出牌、倉存一條龍。專業中港澳跨境指標指標手續辦理。' },
+            { en: 'AI INTELLIGENCE', hk: '數位管家', desc: '數位化 AI 管家程序管理，VIP 客戶專屬後台即時追蹤藝術品的旅程。' },
           ].map((service, index) => (
             <div key={index} className="flex flex-col items-center text-center group cursor-default relative z-10">
               <h3 className="font-serif font-extralight text-2xl tracking-[0.2em] text-zinc-300 mb-5 group-hover:text-amber-300 transition-colors duration-700">
                 {service.en}
               </h3>
+              
               <div className="flex flex-col items-center mb-7">
                 <span className="text-sm font-light text-amber-600/70 tracking-[0.3em] mb-4 group-hover:text-amber-500 transition-colors duration-700">
                   {service.hk}
                 </span>
                 <div className="w-2 h-[1px] bg-zinc-700 group-hover:w-20 group-hover:bg-amber-500 transition-all duration-1000 ease-out"></div>
               </div>
+              
               <p className="text-zinc-500 font-light text-sm tracking-[0.1em] leading-loose max-w-[280px] group-hover:text-zinc-400 transition-colors duration-700">
                 {service.desc}
               </p>
@@ -187,7 +173,7 @@ export default function Home() {
       </section>
 
       {/* 🖋️ Footer */}
-      <footer className="w-full py-12 text-center text-zinc-700 text-xs font-light tracking-[0.4em] bg-black relative z-20 border-t border-zinc-900/50">
+      <footer className="w-full py-12 text-center text-zinc-700 text-xs font-light tracking-[0.4em] bg-black relative z-20 border-t border-zinc-900/50 Footer text-center">
         <p className="opacity-40 hover:opacity-100 transition-opacity duration-700">
           © {new Date().getFullYear()} GOLDLAND HK <span className="mx-2 font-extralight text-zinc-800">|</span> ELITE CONCIERGE
         </p>
