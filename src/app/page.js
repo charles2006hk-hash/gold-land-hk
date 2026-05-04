@@ -1,20 +1,5 @@
 import Link from 'next/link';
 
-{/* 🛰️ 頂部導覽列 (加入首頁最上方) */}
-<nav className="fixed top-0 w-full z-50 flex justify-between items-baseline px-6 md:px-12 py-10 pointer-events-none">
-  <div className="text-zinc-400 font-serif tracking-[0.4em] text-sm pointer-events-auto cursor-default">
-    GOLDLAND <span className="text-amber-600/50 font-thin">|</span> HK
-  </div>
-  <div className="flex gap-12 pointer-events-auto">
-    <Link href="/collection" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em]">
-      COLLECTION
-    </Link>
-    <Link href="/vip" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em]">
-      MEMBERS
-    </Link>
-  </div>
-</nav>
-
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-black overflow-hidden font-sans selection:bg-amber-900/30 relative">
@@ -48,10 +33,9 @@ export default function Home() {
       {/* 🟢 第 0 層：深淵純黑背景 */}
       <div className="absolute inset-0 bg-[#030100] z-0"></div>
 
-      {/* 🟢 第 1 層：神車部位幽靈顯露 (使用 linear-gradient 實現無痕邊緣消散) */}
+      {/* 🟢 第 1 層：神車部位幽靈顯露 */}
       <div className="absolute top-0 left-0 w-full h-screen z-1 pointer-events-none mix-blend-screen overflow-hidden">
-        
-        {/* 神車 1：Pagani (鎖定在最左側，向右漸隱化為無形) */}
+        {/* 神車 1：Pagani */}
         <div 
           className="absolute top-0 left-0 w-[40vw] h-screen animate-breathe-parts"
           style={{ 
@@ -63,26 +47,26 @@ export default function Home() {
           <img src="/pagani.png" alt="Pagani Detail" className="w-full h-full object-cover object-left" />
         </div>
 
-        {/* 神車 2：Rolls Royce (鎖定在最右側，向左漸隱化為無形) */}
+        {/* 神車 2：Rolls Royce */}
         <div 
           className="absolute top-0 right-0 w-[40vw] h-screen animate-breathe-parts"
           style={{ 
             WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%)',
             maskImage: 'linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%)',
-            animationDelay: '7s' /* 錯開呼吸時間，營造流動感 */
+            animationDelay: '7s'
           }}
         >
           <img src="/rollsroyce.png" alt="Rolls Royce Detail" className="w-full h-full object-cover object-right" />
         </div>
       </div>
       
-      {/* 🌅 第 2 層：環境琥珀微光 (大幅降低存在感，只做為底蘊) */}
+      {/* 🌅 第 2 層：環境琥珀微光 */}
       <div className="absolute top-0 left-0 w-full h-screen z-2 pointer-events-none mix-blend-screen overflow-hidden">
         <div className="absolute top-[0%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-amber-600/10" style={{ animation: 'breatheGlow 20s infinite' }}></div>
         <div className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-orange-900/10" style={{ animation: 'breatheGlow 20s infinite alternate-reverse' }}></div>
       </div>
 
-      {/* 🏎️ 第 3 層：SVG 靈魂光影線條 (流線速度感) */}
+      {/* 🏎️ 第 3 層：SVG 靈魂光影線條 */}
       <div className="absolute top-0 left-0 w-full h-screen z-3 pointer-events-none opacity-60 overflow-hidden">
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           <path d="M -50 850 Q 250 700, 450 650 T 1150 450 M 350 730 C 400 700, 500 700, 550 730" fill="transparent" stroke="rgba(251, 191, 36, 0.4)" strokeWidth="0.8" className="animate-streak" style={{ animationDelay: '0s' }} />
@@ -92,8 +76,23 @@ export default function Home() {
         </svg>
       </div>
 
-      {/* 🌌 第 4 層：主視覺文字內容區 (保持絕對置中大器) */}
-      <section className="relative z-20 w-full min-h-screen flex flex-col justify-center items-center text-center px-6 pb-32">
+      {/* 🛰️ 頂部導覽列 (修復：移至背景層之上，並確保 z-50 生效) */}
+      <nav className="absolute top-0 w-full z-50 flex justify-between items-baseline px-6 md:px-12 py-10 pointer-events-none">
+        <div className="text-zinc-400 font-serif tracking-[0.4em] text-sm pointer-events-auto cursor-default drop-shadow-md">
+          GOLDLAND <span className="text-amber-600/50 font-thin mx-1">|</span> HK
+        </div>
+        <div className="flex gap-8 md:gap-12 pointer-events-auto">
+          <Link href="/collection" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em] drop-shadow-md">
+            COLLECTION
+          </Link>
+          <Link href="/vip" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em] drop-shadow-md">
+            MEMBERS
+          </Link>
+        </div>
+      </nav>
+
+      {/* 🌌 第 4 層：主視覺文字內容區 */}
+      <section className="relative z-20 w-full min-h-screen flex flex-col justify-center items-center text-center px-6 pb-32 pt-20">
         <div className="max-w-5xl w-full flex flex-col items-center mt-12 mb-16 relative z-30">
           
           <h1 className="font-serif font-extralight text-5xl md:text-7xl lg:text-8xl tracking-[0.25em] leading-tight mb-8">
