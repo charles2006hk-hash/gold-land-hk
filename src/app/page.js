@@ -16,10 +16,9 @@ export default function Home() {
           0%, 100% { opacity: 0.1; transform: scale(1); filter: blur(50px); }
           50% { opacity: 0.4; transform: scale(1.05); filter: blur(70px); }
         }
-        /* 讓神車部件有呼吸顯露感 */
         @keyframes breatheParts {
-          0%, 100% { opacity: 0.15; transform: scale(1.02); filter: grayscale(30%) brightness(0.8); }
-          50% { opacity: 0.65; transform: scale(1); filter: grayscale(0%) brightness(1.2); } 
+          0%, 100% { opacity: 0.2; transform: scale(1.02); filter: grayscale(30%) brightness(0.8); }
+          50% { opacity: 0.8; transform: scale(1); filter: grayscale(0%) brightness(1.2); } 
         }
         @keyframes breatheGuide {
           0%, 100% { opacity: 0.2; transform: translate(-50%, 0px); }
@@ -33,53 +32,56 @@ export default function Home() {
       {/* 🟢 第 0 層：純黑背景 */}
       <div className="absolute inset-0 bg-[#050200] z-0"></div>
 
-      {/* 🟢 第 1 層：神車部位細節 (🔧 修復：限制為 h-screen，鎖定在第一屏) */}
+      {/* 🟢 第 1 層：神車部位細節 (使用 closest-side 實現無痕羽化) */}
       <div className="absolute top-0 left-0 w-full h-screen z-1 pointer-events-none mix-blend-screen overflow-hidden">
         
-        {/* 神車 1：Pagani (左側偏上) */}
+        {/* 神車 1：Pagani (左側偏上) - 修復生硬邊緣 */}
         <div 
-          className="absolute top-[15%] left-[-2%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
+          className="absolute top-[10%] left-[-5%] w-[50vw] h-[50vw] max-w-[650px] max-h-[650px] animate-breathe-parts"
           style={{ 
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
+            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
             animationDelay: '0s'
           }}
         >
-          <img src="/pagani.png" alt="Pagani Detail" className="w-full h-full object-cover" />
+          {/* 確保您的 public 資料夾內有這個全小寫檔名的圖片 */}
+          <img src="/pagani.png" alt="Pagani" className="w-full h-full object-cover" />
         </div>
 
         {/* 神車 2：Rolls Royce (右上) */}
         <div 
-          className="absolute top-[5%] right-[0%] w-[40vw] h-[40vw] max-w-[550px] max-h-[550px] animate-breathe-parts"
+          className="absolute top-[-5%] right-[-5%] w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
           style={{ 
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
+            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 100%)',
             animationDelay: '4s'
           }}
         >
-          <img src="/rollsroyce.png" alt="Rolls Royce Detail" className="w-full h-full object-cover object-left" />
+          {/* 確保您的 public 資料夾內有這個全小寫檔名的圖片 */}
+          <img src="/rollsroyce.png" alt="Rolls Royce" className="w-full h-full object-cover object-left" />
         </div>
 
-        {/* 神車 3：Ferrari (右下) - 🔧 絕對鎖定在第一屏的右下角 */}
+        {/* 神車 3：Ferrari (右下) - 🔧 絕對錨定在右下角，並使用最柔和的遮罩 */}
         <div 
-          className="absolute bottom-[15%] right-[5%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] animate-breathe-parts"
+          className="absolute bottom-0 right-0 w-[45vw] h-[45vw] max-w-[600px] max-h-[600px] animate-breathe-parts"
           style={{ 
-            WebkitMaskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
-            maskImage: 'radial-gradient(circle at center, rgba(0,0,0,1) 20%, rgba(0,0,0,0) 70%)',
+            WebkitMaskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)',
+            maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 100%)',
             animationDelay: '8s'
           }}
         >
-          <img src="/ferrari.png" alt="Ferrari Detail" className="w-full h-full object-cover" />
+          {/* ⚠️ 極度重要：請去 GitHub 確認法拉利的檔名是不是 100% 全小寫的 ferrari.png */}
+          <img src="/ferrari.png" alt="Ferrari" className="w-full h-full object-cover object-center" />
         </div>
       </div>
       
-      {/* 🌅 第 2 層：環境琥珀光暈 (限制在第一屏) */}
+      {/* 🌅 第 2 層：環境琥珀光暈 */}
       <div className="absolute top-0 left-0 w-full h-screen z-2 pointer-events-none mix-blend-screen overflow-hidden">
         <div className="absolute top-[0%] left-[10%] w-[40vw] h-[40vw] rounded-full bg-amber-600/10" style={{ animation: 'breatheGlow 15s infinite' }}></div>
         <div className="absolute bottom-[10%] right-[10%] w-[50vw] h-[50vw] rounded-full bg-orange-900/10" style={{ animation: 'breatheGlow 15s infinite alternate-reverse' }}></div>
       </div>
 
-      {/* 🏎️ 第 3 層：SVG 靈魂光影線條 (同樣限制在第一屏) */}
+      {/* 🏎️ 第 3 層：SVG 靈魂光影線條 */}
       <div className="absolute top-0 left-0 w-full h-screen z-3 pointer-events-none opacity-80 overflow-hidden">
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           <path d="M -50 850 Q 250 700, 450 650 T 1150 450 M 350 730 C 400 700, 500 700, 550 730" fill="transparent" stroke="rgba(251, 191, 36, 0.6)" strokeWidth="1" className="animate-streak" style={{ animationDelay: '0s' }} />
