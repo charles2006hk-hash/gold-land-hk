@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col bg-black overflow-hidden font-sans selection:bg-amber-900/30 relative">
       
-      {/* 注入自訂的 CSS 動畫 (處理高速光影、呼吸與顯露) */}
+      {/* 注入自訂的 CSS 動畫 (處理高速光影、呼吸與顯露、向下引導) */}
       <style dangerouslySetInnerHTML={{__html: `
         /* 🏎️ 高速光影疾風動畫 */
         @keyframes streakLine {
@@ -18,10 +18,15 @@ export default function Home() {
           0%, 100% { opacity: 0.2; transform: scale(1); filter: blur(40px); }
           50% { opacity: 0.55; transform: scale(1.05); filter: blur(60px); }
         }
-        /* 🌌 新款名車圖片幽靈顯露動畫 */
+        /* 🌌 【修復】新款名車魂魄清晰顯露動畫 (Showcasing Icons) */
         @keyframes breatheImages {
-          0%, 100% { opacity: 0; filter: blur(5px); transform: scale(1.05); }
-          50% { opacity: 0.08; filter: blur(0px); transform: scale(1.0); } /* 琥珀光最亮時顯露 */
+          0%, 100% { opacity: 0.05; filter: blur(2px) brightness(0.8); transform: scale(1.05); }
+          50% { opacity: 0.15; filter: blur(1px) brightness(1.1); transform: scale(1); } /* 琥珀光最亮時顯露 */
+        }
+        /* ⬇️ 【新增】向下滾動引導呼吸箭頭動畫 */
+        @keyframes breatheGuide {
+          0%, 100% { opacity: 0.3; transform: translate(-50%, 0px); }
+          50% { opacity: 0.8; transform: translate(-50%, 10px); }
         }
         /* 日出而作，日落而奢背景動畫 */
         @keyframes dayToNight {
@@ -36,34 +41,37 @@ export default function Home() {
         .animate-breathe-images {
           animation: breatheImages 25s ease-in-out infinite; /* 與背景呼吸同步 */
         }
+        .animate-breathe-guide {
+          animation: breatheGuide 3s ease-in-out infinite; /* 向下引導呼吸週期 */
+        }
         .bg-day-night {
           background-size: 200% 200%;
           animation: dayToNight 25s ease-in-out infinite;
         }
       `}} />
 
-      {/* 🟢 第0層 (底層)：隱約呼吸顯露的新款名車幽靈圖片 (different corners) */}
+      {/* 🟢 第0層 (底層)：【大幅優化】清晰顯露的新款名車魂魄圖片 (Showcasing Icons, z-0) */}
       <div className="absolute inset-0 z-0 animate-breathe-images pointer-events-none">
         
-        {/* Rolls Royce Spectre (右下角) */}
+        {/* Rolls Royce Spectre (右下角魂魄) */}
         <img 
           src="https://images.unsplash.com/photo-1692120084323-8321857c5765?q=80&w=2500&auto=format&fit=crop" 
-          alt="Rolls Royce Spectre Phantom Luxe"
-          className="absolute -bottom-10 -right-20 w-[60vw] h-auto object-contain object-bottom opacity-10 blur-sm scale-110"
+          alt="Rolls Royce Spectre Phantom Luxe Icon"
+          className="absolute -bottom-10 -right-20 w-[60vw] h-auto object-contain object-bottom scale-110 opacity-12 blur-[1.2px]" // 清晰度大幅增加
         />
         
-        {/* Bugatti Mistral (中心幽靈) */}
+        {/* Bugatti Mistral (中心幽靈魂魄) */}
         <img 
           src="https://images.unsplash.com/photo-1662996115982-b7e1952e4299?q=80&w=2500&auto=format&fit=crop" 
-          alt="Bugatti Mistral Phantom Line"
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-auto object-contain object-center opacity-8 blur-sm scale-110"
+          alt="Bugatti Mistral Phantom Line Icon"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] h-auto object-contain object-center scale-110 opacity-15 blur-[1px]" // 中心魂魄最清晰
         />
 
-        {/* Pagani Utopia (左上角) */}
+        {/* Pagani Utopia (左上角魂魄) */}
         <img 
           src="https://images.unsplash.com/photo-1678864757367-172554743b59?q=80&w=2500&auto=format&fit=crop" 
-          alt="Pagani Utopia Soul Line"
-          className="absolute -top-10 -left-20 w-[60vw] h-auto object-contain object-top opacity-10 blur-sm scale-110"
+          alt="Pagani Utopia Soul Line Icon"
+          className="absolute -top-10 -left-20 w-[60vw] h-auto object-contain object-top scale-110 opacity-12 blur-[1.2px]" // 清晰度增加
         />
       </div>
 
@@ -74,11 +82,11 @@ export default function Home() {
       <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-amber-600/10 z-2" style={{ animation: 'breatheGlow 25s infinite' }}></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-orange-900/10 z-2" style={{ animation: 'breatheGlow 25s infinite' }}></div>
 
-      {/* 🏎️ 第2層：高速光影 SVG 線條 (Pagani, Bugatti, rolls Royce 抽象線條做高速劃破螢幕) */}
+      {/* 🏎️ 第2層：高速光影 SVG 線條 */}
       <div className="absolute inset-0 z-2 pointer-events-none opacity-80">
         <svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
           
-          {/* Pagani 靈魂：疾風流線和前臉線條 (最先出現的高速光影) */}
+          {/* Pagani 靈魂：疾風流線和前臉線條 (高速劃破螢幕) */}
           <path 
             d="M -50 850 Q 250 700, 450 650 T 1150 450 M 350 730 C 400 700, 500 700, 550 730 M 450 650 C 460 670, 460 690, 450 710" 
             fill="transparent" 
@@ -93,7 +101,7 @@ export default function Home() {
           <path d="M 140 0 L 140 1000" fill="transparent" stroke="rgba(255, 255, 255, 0.01)" strokeWidth="0.6" className="animate-streak" style={{ animationDelay: '2.5s' }} />
           <path d="M 0 350 L 1000 350" fill="transparent" stroke="rgba(251, 191, 36, 0.03)" strokeWidth="0.3" className="animate-streak" style={{ animationDelay: '1.2s' }} />
 
-          {/* Bugatti 靈魂：經典 C-Line 做高速餘光 (最後一個劃破螢幕) */}
+          {/* Bugatti 靈魂：經典 C-Line 做高速餘光 */}
           <path 
           d="M 880 150 C 980 150, 1000 450, 880 700 C 730 700, 730 400, 880 400 M 820 500 C 830 520, 830 540, 820 560" 
           fill="transparent" 
@@ -118,10 +126,10 @@ export default function Home() {
         </svg>
       </div>
 
-      {/* 🌌 第3層：主視覺內容區：懸浮於幽靈圖片與高速線條之上 */}
-      <section className="relative z-20 w-full min-h-[85vh] flex flex-col justify-center items-center text-center px-6 mt-12 pb-24">
+      {/* 🌌 第3層：主視覺內容區：懸浮於幽靈圖片與高速線條之上 (Hero height optimized) */}
+      <section className="relative z-20 w-full min-h-[90vh] flex flex-col justify-center items-center text-center px-6 mt-12 pb-32">
         
-        <div className="max-w-5xl w-full flex flex-col items-center mt-12">
+        <div className="max-w-5xl w-full flex flex-col items-center mt-12 mb-16">
           
           {/* 大標題 */}
           <h1 className="font-serif font-extralight text-5xl md:text-7xl lg:text-8xl tracking-[0.25em] leading-tight mb-8">
@@ -132,7 +140,7 @@ export default function Home() {
             </span>
           </h1>
 
-          {/* 🔴 副標題 (日落而奢中文版) 🔴 */}
+          {/* 副標題 (日落而奢中文版) */}
           <p className="text-lg md:text-xl text-zinc-400 font-light tracking-[0.4em] mb-16 opacity-95">
             日出而作 <span className="mx-4 text-amber-500/40 font-thin">|</span> 
             <span className="text-amber-100/90 hover:text-amber-100 transition-colors duration-500 relative">
@@ -142,7 +150,7 @@ export default function Home() {
             </span>
           </p>
           
-          {/* 讓人「一看就想溝通」的聯絡/登入按鈕區 (修復對齊) */}
+          {/* 讓人「一看就想溝通」的聯絡/登入按鈕區 */}
           <div className="flex flex-col sm:flex-row gap-8 w-full max-w-3xl justify-center items-center mt-4">
             
             {/* GLOBAL FIND 按鈕 (確保對齊) */}
@@ -164,9 +172,20 @@ export default function Home() {
 
           </div>
         </div>
+
+        {/* ⬇️ 【新增】向下滾動引導呼吸箭頭 (Scroll Guide, z-20) */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-breathe-guide z-20 pointer-events-none opacity-80 flex flex-col items-center">
+          <svg viewBox="0 0 24 24" className="w-8 h-8 fill-none stroke-amber-500 stroke-1 mb-2">
+            <path d="M12 21V3M12 21L17 16M12 21L7 16" />
+          </svg>
+          <div className="text-amber-600/60 font-light tracking-[0.3em] text-[10px] absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap">
+            EXPLORE THE LUXE
+          </div>
+        </div>
+
       </section>
 
-      {/* 🕯️ 服務展示區：極簡留白 */}
+      {/* 🕯️ 服務展示區 (特意放在下面的卡片區) */}
       <section className="w-full relative z-20 bg-black pb-40 px-6 md:px-12 flex justify-center border-t-[0.5px] border-zinc-800/30 mt-10">
         
         <div className="max-w-7xl w-full grid grid-cols-1 md:grid-cols-3 gap-x-16 gap-y-20 pt-24 relative overflow-hidden">
@@ -175,9 +194,9 @@ export default function Home() {
           <div className="absolute top-0 -left-1/2 w-[120vw] h-[120vw] rounded-full bg-amber-900/10" style={{ animation: 'breatheGlow 25s infinite' }}></div>
           
           {[
-            { en: 'GLOBAL ACQUISITION', hk: '全球車源配對', desc: '日本直連、歐洲訂製。為您網羅世界頂級限量車款與傳奇魂魄線條。' },
-            { en: 'CROSS-BORDER LOGISTICS', hk: '一站式跨境引進', desc: '訂購、運輸、出牌、倉存一條龍。專業中港澳跨境指標代辦手續。' },
-            { en: 'AI INTELLIGENCE', hk: '數碼化 AI 管家', desc: '數碼程序管理，VIP 客戶專屬加密後台即時追蹤藝術品的旅程。' },
+            { en: 'DIVERSITY', hk: '名車多樣性', desc: '為您網羅 Pagani、Bugatti、Rolls Royce 等傳奇魂魄線條與極致珍藏。' },
+            { en: 'CROSS-BORDER', hk: '無縫跨境 logistical', desc: '專業代辦中港澳跨境指標指標手續，暢行大灣區，不受地域界限。' },
+            { en: 'AI INTELLIGENCE', hk: '數位管家', desc: '數位程序管理，VIP 客戶專屬加密後台即時追蹤藝術品的旅程。' },
           ].map((service, index) => (
             <div key={index} className="flex flex-col items-center text-center group cursor-default relative z-10">
               <h3 className="font-serif font-extralight text-2xl tracking-[0.2em] text-zinc-300 mb-5 group-hover:text-amber-300 transition-colors duration-700">
@@ -201,7 +220,7 @@ export default function Home() {
       </section>
 
       {/* 🖋️ Footer */}
-      <footer className="w-full py-12 text-center text-zinc-700 text-xs font-light tracking-[0.4em] bg-black relative z-20 border-t border-zinc-900/50 Footer text-center">
+      <footer className="w-full py-12 text-center text-zinc-700 text-xs font-light tracking-[0.4em] bg-black relative z-20 border-t border-zinc-900/50 text-center">
         <p className="opacity-40 hover:opacity-100 transition-opacity duration-700">
           © {new Date().getFullYear()} GOLDLAND HK <span className="mx-2 font-extralight text-zinc-800">|</span> ELITE CONCIERGE
         </p>
