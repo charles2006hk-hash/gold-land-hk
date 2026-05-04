@@ -97,12 +97,12 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-8 w-full max-w-3xl justify-center items-center mt-4">
-            <button className="group relative px-10 py-5 w-full sm:w-auto bg-black/40 backdrop-blur-md border border-amber-500/20 text-amber-100/80 font-light rounded-sm hover:border-amber-400/50 transition-all duration-700 overflow-hidden flex items-baseline justify-center">
+            <Link href="/global-find" className="group relative px-10 py-5 w-full sm:w-auto bg-black/40 backdrop-blur-md border border-amber-500/20 text-amber-100/80 font-light rounded-sm hover:border-amber-400/50 transition-all duration-700 overflow-hidden flex items-baseline justify-center">
               <div className="absolute inset-0 w-0 bg-gradient-to-r from-amber-950/40 to-black/50 group-hover:w-full transition-all duration-1000 ease-out z-0"></div>
               <span className="relative z-10 font-sans tracking-[0.25em] text-xs">GLOBAL FIND</span>
               <span className="relative z-10 text-amber-500/30 font-thin mx-3 text-lg">|</span>
               <span className="relative z-10 font-sans tracking-[0.2em] text-lg">全球尋車</span>
-            </button>
+            </Link>
             
             <Link href="/vip" className="px-10 py-5 w-full sm:w-auto text-zinc-400 font-light tracking-[0.25em] text-lg rounded-sm hover:text-zinc-200 transition-all duration-700 group flex items-baseline justify-center relative">
               <span className="font-sans tracking-[0.25em] text-xs">VIP PORTAL</span>
