@@ -1,34 +1,18 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
 
+// 讀取您剛才在 Vercel 設定的環境變數
 const firebaseConfig = {
-  apiKey: "AIzaSyDgxoJInutJY7ZvqCUi6ZG8sFOn3L0pGQg",
-  authDomain: "gold-land-hk.firebaseapp.com",
-  projectId: "gold-land-hk",
-  storageBucket: "gold-land-hk.firebasestorage.app",
-  messagingSenderId: "443962742926",
-  appId: "1:443962742926:web:406792d73242b0b775d1df",
-  measurementId: "G-7BYE0M8EZY"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-// 初始化 Firebase (加入防錯處理)
-let app;
-let db;
-let auth;
+// 確保 Firebase 只被初始化一次
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
-try {
-  // 檢查是否已經初始化
-  app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-  db = getFirestore(app);
-  // 加入 try-catch 防止瀏覽器隱私設定導致 Auth 初始化失敗
-  try {
-    auth = getAuth(app);
-  } catch (e) {
-    console.warn("Auth initialization blocked by browser settings (likely Incognito mode).", e);
-  }
-} catch (error) {
-  console.error("Firebase initialization error:", error);
-}
-
-export { db, auth };
+export { db };
