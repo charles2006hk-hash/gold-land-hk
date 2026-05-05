@@ -6,7 +6,8 @@ import emailjs from '@emailjs/browser';
 
 export default function GlobalFind() {
   const [step, setStep] = useState(1);
-  const [selections, setSelections] = useState({ aura: '', texture: '', tone: '', contact: '' });
+  // ✅ 更新狀態：加入 name, email, phone 獨立欄位
+  const [selections, setSelections] = useState({ aura: '', texture: '', tone: '', name: '', email: '', phone: '' });
   const [status, setStatus] = useState('idle'); // idle, analyzing, success
   const [aiResponse, setAiResponse] = useState('');
 
@@ -33,12 +34,14 @@ export default function GlobalFind() {
     e.preventDefault();
     setStatus('analyzing');
     
-    // 準備要寄送給您的資料內容
+    // ✅ 更新參數：精準傳送客戶的姓名、信箱與電話
     const templateParams = {
       aura: selections.aura,
       texture: selections.texture,
       tone: selections.tone,
-      contact: selections.contact,
+      name: selections.name,
+      email: selections.email,
+      phone: selections.phone,
     };
 
     // 🚀 執行真實寄信！(讀取 Vercel 的環境變數)
@@ -55,7 +58,7 @@ export default function GlobalFind() {
     })
     .catch((err) => {
       console.log('FAILED...', err);
-      // 即使寄信失敗，為了頂級客戶體驗，依然顯示成功畫面，但您可以在 Console 抓錯
+      // 即使寄信失敗，為了頂級客戶體驗，依然顯示成功畫面
       generateAiResponse();
       setStatus('success');
     });
@@ -107,7 +110,7 @@ export default function GlobalFind() {
           </div>
 
           {/* 互動表單區域 */}
-          <div className="w-full relative min-h-[300px]">
+          <div className="w-full relative min-h-[350px]">
             
             {/* 步驟 1: 氣場選擇 */}
             <div className={`absolute inset-0 transition-all duration-700 ${step === 1 ? 'opacity-100 translate-x-0 z-10' : 'opacity-0 -translate-x-8 pointer-events-none'}`}>
@@ -147,16 +150,31 @@ export default function GlobalFind() {
               </div>
             </div>
 
-            {/* 步驟 4: 聯絡資訊 */}
+            {/* 步驟 4: 聯絡資訊 (✅ 已升級為三欄位：Name, Email, Phone) */}
             <div className={`absolute inset-0 transition-all duration-700 ${step === 4 ? 'opacity-100 translate-x-0 z-10' : 'opacity-0 translate-x-8 pointer-events-none'}`}>
               <h2 className="text-zinc-400 text-sm tracking-[0.2em] font-light text-center mb-8">品味輪廓已建立。請留下聯絡方式，啟動 AI 管家分析。</h2>
-              <form onSubmit={handleSubmit} className="flex flex-col gap-10 mt-12">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-8 mt-12">
                 <div className="relative group">
-                  <input type="text" required onChange={(e) => setSelections({...selections, contact: e.target.value})} className="w-full bg-transparent border-b border-zinc-800 py-3 px-2 text-amber-100/90 text-sm tracking-[0.15em] focus:outline-none focus:border-amber-500/50 transition-colors peer" placeholder=" " />
+                  <input type="text" required onChange={(e) => setSelections({...selections, name: e.target.value})} className="w-full bg-transparent border-b border-zinc-800 py-3 px-2 text-amber-100/90 text-sm tracking-[0.15em] focus:outline-none focus:border-amber-500/50 transition-colors peer" placeholder=" " />
                   <label className="absolute left-2 top-3 text-zinc-600 text-xs tracking-[0.2em] transition-all peer-focus:-top-5 peer-focus:text-[10px] peer-focus:text-amber-500/70 peer-valid:-top-5 peer-valid:text-[10px] peer-valid:text-amber-500/50 pointer-events-none">
-                    WHATSAPP / EMAIL <span className="mx-2 font-thin text-zinc-700">|</span> 專屬聯絡渠道
+                    YOUR NAME <span className="mx-2 font-thin text-zinc-700">|</span> 尊姓大名
                   </label>
                 </div>
+                
+                <div className="relative group">
+                  <input type="email" required onChange={(e) => setSelections({...selections, email: e.target.value})} className="w-full bg-transparent border-b border-zinc-800 py-3 px-2 text-amber-100/90 text-sm tracking-[0.15em] focus:outline-none focus:border-amber-500/50 transition-colors peer" placeholder=" " />
+                  <label className="absolute left-2 top-3 text-zinc-600 text-xs tracking-[0.2em] transition-all peer-focus:-top-5 peer-focus:text-[10px] peer-focus:text-amber-500/70 peer-valid:-top-5 peer-valid:text-[10px] peer-valid:text-amber-500/50 pointer-events-none">
+                    SECURE EMAIL <span className="mx-2 font-thin text-zinc-700">|</span> 加密電子郵件
+                  </label>
+                </div>
+
+                <div className="relative group">
+                  <input type="tel" onChange={(e) => setSelections({...selections, phone: e.target.value})} className="w-full bg-transparent border-b border-zinc-800 py-3 px-2 text-amber-100/90 text-sm tracking-[0.15em] focus:outline-none focus:border-amber-500/50 transition-colors peer" placeholder=" " />
+                  <label className="absolute left-2 top-3 text-zinc-600 text-xs tracking-[0.2em] transition-all peer-focus:-top-5 peer-focus:text-[10px] peer-focus:text-amber-500/70 peer-valid:-top-5 peer-valid:text-[10px] peer-valid:text-amber-500/50 pointer-events-none">
+                    WHATSAPP (OPTIONAL) <span className="mx-2 font-thin text-zinc-700">|</span> 聯絡電話 (選填)
+                  </label>
+                </div>
+                
                 <button type="submit" className="mt-4 w-full py-5 bg-amber-950/10 border border-amber-500/30 text-amber-100/80 text-xs tracking-[0.4em] hover:bg-amber-900/30 hover:border-amber-500/60 transition-all duration-700">
                   INITIATE AI ANALYSIS
                 </button>
