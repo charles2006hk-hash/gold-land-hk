@@ -1,8 +1,28 @@
+"use client";
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  // 🚗 定義您的 3 張本地 PNG 車輛圖片
+  const cars = [
+    "/pagani.png",
+    "/ferrari.png", 
+    "/rollsroyce.png"
+  ];
+  
+  const [current, setCurrent] = useState(0);
+
+  // 控制隱約交換的節奏 (每 8 秒交換一次，配合 6 秒的超慢漸變)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % cars.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [cars.length]);
+
   return (
-    <main className="flex min-h-screen flex-col bg-black overflow-hidden font-sans selection:bg-amber-900/30 relative">
+    <main className="flex min-h-screen flex-col bg-[#030100] overflow-hidden font-sans selection:bg-amber-900/30 relative">
       
       {/* 注入自訂的 CSS 動畫 */}
       <style dangerouslySetInnerHTML={{__html: `
@@ -16,48 +36,40 @@ export default function Home() {
           0%, 100% { opacity: 0.05; transform: scale(1); filter: blur(50px); }
           50% { opacity: 0.3; transform: scale(1.05); filter: blur(70px); }
         }
-        /* 🌌 極致奢華：壓低亮度和透明度，提高灰階，只留反光 */
-        @keyframes breatheParts {
-          0%, 100% { opacity: 0.05; transform: scale(1.02); filter: grayscale(90%) brightness(0.5); }
-          50% { opacity: 0.20; transform: scale(1); filter: grayscale(70%) brightness(0.9); } 
-        }
         @keyframes breatheGuide {
           0%, 100% { opacity: 0.1; transform: translate(-50%, 0px); }
           50% { opacity: 0.6; transform: translate(-50%, 10px); }
         }
         .animate-streak { animation: streakLine 1.5s ease-out infinite; }
-        .animate-breathe-parts { animation: breatheParts 15s ease-in-out infinite; }
         .animate-breathe-guide { animation: breatheGuide 3s ease-in-out infinite; }
       `}} />
 
       {/* 🟢 第 0 層：深淵純黑背景 */}
       <div className="absolute inset-0 bg-[#030100] z-0"></div>
 
-      {/* 🟢 第 1 層：神車部位幽靈顯露 */}
-      <div className="absolute top-0 left-0 w-full h-screen z-1 pointer-events-none mix-blend-screen overflow-hidden">
-        {/* 神車 1：Pagani */}
-        <div 
-          className="absolute top-0 left-0 w-[40vw] h-screen animate-breathe-parts"
-          style={{ 
-            WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%)',
-            maskImage: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%)',
-            animationDelay: '0s'
-          }}
-        >
-          <img src="/pagani.png" alt="Pagani Detail" className="w-full h-full object-cover object-left" />
-        </div>
+      {/* 🟢 第 1 層：沒感覺的隱約三車無縫輪播 (取代原本的固定圖片) */}
+      <div className="absolute inset-0 w-full h-screen z-1 pointer-events-none mix-blend-screen overflow-hidden flex justify-center items-center">
+        
+        {/* 邊緣漸層遮罩，讓圖片完美融入背景，無生硬邊界 */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0)_20%,rgba(3,1,0,1)_80%)] z-10"></div>
 
-        {/* 神車 2：Rolls Royce */}
-        <div 
-          className="absolute top-0 right-0 w-[40vw] h-screen animate-breathe-parts"
-          style={{ 
-            WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%)',
-            maskImage: 'linear-gradient(to left, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 80%)',
-            animationDelay: '7s'
-          }}
-        >
-          <img src="/rollsroyce.png" alt="Rolls Royce Detail" className="w-full h-full object-cover object-right" />
-        </div>
+        {cars.map((car, index) => (
+          <div
+            key={index}
+            className={`absolute w-[80vw] md:w-[60vw] h-full transition-opacity ease-in-out z-0 flex justify-center items-center
+              duration-[6000ms] /* 6秒的超慢漸變，極致無感 */
+              ${index === current ? 'opacity-[0.15]' : 'opacity-0'} /* 最高透明度壓在 15%，保持極致低調的氣場 */
+            `}
+          >
+            {/* 使用 grayscale 和低亮度，只保留金屬反光與輪廓 */}
+            <img 
+              src={car} 
+              alt="Luxury Car Silhouette" 
+              className="w-full h-auto object-contain grayscale-[80%] brightness-75 mix-blend-lighten scale-105 transform transition-transform duration-[15000ms] ease-out"
+              style={{ transform: index === current ? 'scale(1)' : 'scale(1.05)' }} // 微微的呼吸縮放感
+            />
+          </div>
+        ))}
       </div>
       
       {/* 🌅 第 2 層：環境琥珀微光 */}
@@ -76,24 +88,24 @@ export default function Home() {
         </svg>
       </div>
 
-      {/* 🛰️ 頂部導覽列 (修復：移至背景層之上，並確保 z-50 生效) */}
+      {/* 🛰️ 頂部導覽列 */}
       <nav className="absolute top-0 w-full z-50 flex justify-between items-baseline px-6 md:px-12 py-10 pointer-events-none">
         <div className="text-zinc-400 font-serif tracking-[0.4em] text-sm pointer-events-auto cursor-default drop-shadow-md">
           GOLDLAND <span className="text-amber-600/50 font-thin mx-1">|</span> HK
         </div>
         <div className="flex gap-8 md:gap-12 pointer-events-auto">
-          <Link href="/collection" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em] drop-shadow-md">
-            COLLECTION
+          <Link href="/admin-portal" className="text-zinc-700 hover:text-amber-600 transition-colors duration-500 text-[9px] tracking-[0.4em] drop-shadow-md">
+            CONCIERGE
           </Link>
-          <Link href="/vip" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em] drop-shadow-md">
+          <Link href="/vip-login" className="text-zinc-500 hover:text-amber-400 transition-colors duration-500 text-[10px] tracking-[0.4em] drop-shadow-md">
             MEMBERS
           </Link>
         </div>
       </nav>
 
       {/* 🌌 第 4 層：主視覺文字內容區 */}
-      <section className="relative z-20 w-full min-h-screen flex flex-col justify-center items-center text-center px-6 pb-32 pt-20">
-        <div className="max-w-5xl w-full flex flex-col items-center mt-12 mb-16 relative z-30">
+      <section className="relative z-20 w-full min-h-screen flex flex-col justify-center items-center text-center px-6 pb-32 pt-20 pointer-events-none">
+        <div className="max-w-5xl w-full flex flex-col items-center mt-12 mb-16 relative z-30 pointer-events-auto">
           
           <h1 className="font-serif font-extralight text-5xl md:text-7xl lg:text-8xl tracking-[0.25em] leading-tight mb-8">
             <span className="text-zinc-300 drop-shadow-md">THE ELITE</span>
@@ -118,7 +130,7 @@ export default function Home() {
               <span className="relative z-10 font-sans tracking-[0.2em] text-lg">全球尋車</span>
             </Link>
             
-            <Link href="/vip" className="px-10 py-5 w-full sm:w-auto text-zinc-400 font-light tracking-[0.25em] text-lg rounded-sm hover:text-zinc-200 transition-all duration-700 group flex items-baseline justify-center relative">
+            <Link href="/vip-login" className="px-10 py-5 w-full sm:w-auto text-zinc-400 font-light tracking-[0.25em] text-lg rounded-sm hover:text-zinc-200 transition-all duration-700 group flex items-baseline justify-center relative">
               <span className="font-sans tracking-[0.25em] text-xs">VIP PORTAL</span>
               <span className="text-zinc-700 font-thin mx-3 text-lg">|</span>
               <span className="font-sans tracking-[0.2em]">尊貴登入</span>
@@ -139,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* 🕯️ 服務展示區 */}
-      <section className="w-full relative z-20 bg-black pb-40 px-6 md:px-12 flex justify-center border-t-[0.5px] border-zinc-800/30 mt-10">
+      <section className="w-full relative z-20 bg-[#020101] pb-40 px-6 md:px-12 flex justify-center border-t-[0.5px] border-zinc-800/30 mt-10">
         <div className="max-w-7xl w-full grid grid-cols-1 md:grid-cols-3 gap-x-16 gap-y-20 pt-24 relative overflow-hidden">
           
           <div className="absolute top-0 -left-1/2 w-[120vw] h-[120vw] rounded-full bg-amber-900/5" style={{ animation: 'breatheGlow 30s infinite' }}></div>
