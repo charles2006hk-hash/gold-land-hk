@@ -12,13 +12,14 @@ export const metadata = {
     apple: '/logo.png', // 🌟 改成 png
   },
   openGraph: {
-    title: 'GOLD LAND HK | Elite Auto Concierge',
+    title: 'GOLD LAND HK | Elite Auto trConcierge',
     description: '日出而作，日落而奢。打破常規，為頂級藏家尋獲全球稀世珍藏。',
     url: 'https://goldlandhk.com',
     siteName: 'GOLD LAND HK',
     images: [
       {
-        url: '/logo.png', // 🌟 改成 png
+        // 🌟 關鍵修改：加上完整的 https 網域
+        url: 'https://goldlandhk.com/logo.png', 
         width: 800,
         height: 800,
         alt: 'GOLD LAND HK Elite Logo',
