@@ -89,10 +89,21 @@ export default function Home() {
       </div>
 
       {/* 🛰️ 頂部導覽列 */}
-      <nav className="absolute top-0 w-full z-50 flex justify-between items-baseline px-6 md:px-12 py-10 pointer-events-none">
-        <div className="text-zinc-400 font-serif tracking-[0.4em] text-sm pointer-events-auto cursor-default drop-shadow-md">
-          GOLDLAND <span className="text-amber-600/50 font-thin mx-1">|</span> HK
+      <nav className="absolute top-0 w-full z-50 flex justify-between items-center px-6 md:px-12 py-8 pointer-events-none">
+        
+        {/* 左側 Logo 區塊 */}
+        <div className="pointer-events-auto cursor-default flex items-center gap-4">
+          <img 
+            src="/logo.png" 
+            alt="GOLDLAND HK Logo" 
+            className="h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(251,191,36,0.4)]" 
+          />
+          <div className="text-zinc-400 font-serif tracking-[0.4em] text-sm hidden md:block drop-shadow-md">
+            GOLDLAND <span className="text-amber-600/50 font-thin mx-1">|</span> HK
+          </div>
         </div>
+
+        {/* 右側選單 */}
         <div className="flex gap-8 md:gap-12 pointer-events-auto">
           <Link href="/admin-portal" className="text-zinc-700 hover:text-amber-600 transition-colors duration-500 text-[9px] tracking-[0.4em] drop-shadow-md">
             CONCIERGE
