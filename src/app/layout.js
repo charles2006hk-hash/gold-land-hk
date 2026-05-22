@@ -1,39 +1,38 @@
-import './globals.css'
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  metadataBase: new URL('https://gold-land-hk.vercel.app'), // 替換為您目前的 Vercel 網址
-  title: 'GOLDLAND HK | The Elite Auto Concierge',
-  description: '日出而作，日落而奢。金田汽車專為頂級藏家提供全球稀世車源配對、中港澳跨境引進與 VIP 專屬數位管家服務。',
+  metadataBase: new URL('https://goldlandhk.com'),
+  title: "GOLD LAND HK | Elite Auto Concierge",
+  description: "日出而作，日落而奢。為頂級藏家尋獲全球稀世珍藏。",
+  icons: {
+    icon: '/logo.png', // 🌟 改成 png
+    apple: '/logo.png', // 🌟 改成 png
+  },
   openGraph: {
-    title: 'GOLDLAND HK | 頂級名車專屬管家',
-    description: '全球稀世車源配對 | 一站式跨境引進 | 尊貴數位管家',
-    url: '/',
-    siteName: 'GOLDLAND HK',
+    title: 'GOLD LAND HK | Elite Auto Concierge',
+    description: '日出而作，日落而奢。打破常規，為頂級藏家尋獲全球稀世珍藏。',
+    url: 'https://goldlandhk.com',
+    siteName: 'GOLD LAND HK',
     images: [
       {
-        url: '/og-image.jpg', // 這是我們等一下要上傳的預覽圖
-        width: 1200,
-        height: 630,
-        alt: 'GOLDLAND HK The Elite Auto Concierge',
+        url: '/logo.png', // 🌟 改成 png
+        width: 800,
+        height: 800,
+        alt: 'GOLD LAND HK Elite Logo',
       },
     ],
     locale: 'zh_HK',
     type: 'website',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'GOLDLAND HK | The Elite Auto Concierge',
-    description: '日出而作，日落而奢。頂級名車專屬管家。',
-    images: ['/og-image.jpg'],
-  },
-}
+};
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="zh-HK">
-      <body className="bg-black text-zinc-200 selection:bg-amber-900/30">
-        {children}
-      </body>
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
     </html>
-  )
+  );
 }
